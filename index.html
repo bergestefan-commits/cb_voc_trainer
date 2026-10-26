@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vokabelheft</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vokabeln">
+<meta name="theme-color" content="#2f9a4f">
+<style>
+:root{
+  --paper:#f4f7fc; --sheet:#ffffff; --ink:#1f2f86; --cover:#2f9a4f; --tab:#f3a59c;
+  --line:#d9e1f1; --fg:#1b2033; --muted:#5d6681; --bad:#cf3f33; --warn:#b7791f;
+  --display:ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --body:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:#11162a; --sheet:#1a2038; --ink:#9db0ff; --cover:#59c878; --tab:#f0a197;
+  --line:#2b3456; --fg:#e7ebf8; --muted:#9aa3c0; --bad:#ff7a6e; --warn:#f2b55a; color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
+[hidden]{display:none!important}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:1.75rem;color:var(--ink);font-weight:800}
+h2{font-size:1.3rem;font-weight:800}
+.muted{color:var(--muted)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+header .sub{font-size:.9rem}
+nav{display:grid;grid-template-columns:repeat(3,1fr);background:var(--sheet);border:2px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+nav button{border:0;background:transparent;border-radius:10px;padding:10px 6px;font-weight:800;color:var(--muted)}
+nav button[aria-current="true"]{background:var(--ink);color:var(--sheet)}
+.sheet{background:var(--sheet);border:2px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.label{font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 14px;font-weight:700}
+.chip[aria-pressed="true"]{border-color:var(--cover);background:color-mix(in srgb,var(--cover) 16%,var(--sheet))}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:420px){.modes{grid-template-columns:1fr}}
+.mode{text-align:left;border:2px solid var(--line);background:var(--paper);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px}
+.mode b{font-family:var(--display);font-size:1.15rem;color:var(--ink)}
+.mode span{font-size:.9rem;color:var(--muted)}
+.mode:disabled{opacity:.5}
+.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:800;background:var(--ink);color:var(--sheet)}
+.btn.green{background:var(--cover);color:#fff}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn.danger{background:transparent;color:var(--bad);border:2px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.stats{display:flex;gap:18px;flex-wrap:wrap;font-size:.92rem}
+.stats b{font-family:var(--display);font-size:1.3rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.card{position:relative;background:var(--sheet);border:2px solid var(--line);border-radius:16px;padding:28px 20px 22px 44px;
+  background-image:repeating-linear-gradient(to bottom,transparent 0 35px,var(--line) 35px 36px);
+  min-height:190px;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.card::before{content:"";position:absolute;left:28px;top:0;bottom:0;width:2px;background:var(--tab);opacity:.8}
+.card .prompt{font-family:var(--display);font-weight:800;font-size:1.7rem;line-height:1.2;overflow-wrap:anywhere}
+.card .answer{font-family:var(--display);font-weight:600;font-size:1.35rem;color:var(--ink);overflow-wrap:anywhere}
+.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--cover);width:0;transition:width .3s}
+.textIn{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:1.2rem;background:var(--paper)}
+.textIn:focus{border-color:var(--ink);outline:none}
+.feedback{border-radius:12px;padding:12px 14px;font-weight:700}
+.feedback.ok{background:color-mix(in srgb,var(--cover) 18%,var(--sheet))}
+.feedback.near{background:color-mix(in srgb,var(--warn) 18%,var(--sheet))}
+.feedback.no{background:color-mix(in srgb,var(--bad) 15%,var(--sheet))}
+.feedback .correct{font-family:var(--display);font-size:1.2rem;color:var(--ink);display:block}
+.speak{border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 12px;font-weight:700;font-size:.9rem;color:var(--ink);align-self:flex-start}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.big{font-family:var(--display);font-size:3rem;font-weight:800;color:var(--cover);line-height:1}
+.unit h3{font-size:1.05rem;color:var(--ink);display:flex;justify-content:space-between;gap:8px}
+.words{list-style:none;margin:0;padding:0}
+.words li{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.words li>span{min-width:0;overflow-wrap:anywhere}
+.words .en{font-weight:800}
+.dots{display:flex;gap:3px}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--cover)}
+.profiles{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.profiles li{display:flex;align-items:center;gap:10px}
+.profiles .pick{flex:1;text-align:left;border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:10px 14px;font-weight:800;display:flex;justify-content:space-between;gap:8px}
+.profiles .pick[aria-current="true"]{border-color:var(--cover);background:color-mix(in srgb,var(--cover) 14%,var(--sheet))}
+.profiles .pick span{font-weight:600;color:var(--muted);font-size:.88rem}
+.note{font-size:.88rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="hello">Vokabelheft</h1>
+    <div class="sub muted" id="subline">Englisch üben, Wort für Wort</div>
+  </header>
+
+  <!-- WELCOME / NEW PROFILE -->
+  <section id="view-welcome" class="sheet" hidden>
+    <h2 id="welcomeTitle">Hallo! Wie heißt du?</h2>
+    <p class="muted" style="margin:0">Dein Name bleibt nur auf diesem Gerät. Hier wird gespeichert, welche Wörter du schon kannst.</p>
+    <form id="nameForm" class="row" autocomplete="off">
+      <input class="textIn" id="nameIn" maxlength="24" placeholder="Vorname" aria-label="Vorname" required>
+      <button class="btn green" type="submit" id="nameGo">Los geht's</button>
+      <button class="btn ghost" type="button" id="nameCancel" hidden>Abbrechen</button>
+    </form>
+  </section>
+
+  <nav aria-label="Bereiche" id="nav">
+    <button id="tab-practice" data-view="practice" aria-current="true">Üben</button>
+    <button id="tab-list" data-view="list" aria-current="false">Wörter</button>
+    <button id="tab-profile" data-view="profile" aria-current="false">Profil</button>
+  </nav>
+
+  <section id="view-practice" class="sheet" hidden>
+    <div class="stats">
+      <div><b id="st-total">0</b> Wörter</div>
+      <div><b id="st-sure">0</b> sitzen schon</div>
+      <div><b id="st-new">0</b> noch neu</div>
+    </div>
+    <div class="label">Welche Units?</div>
+    <div class="chips" id="unitChips"></div>
+    <div class="label">Wie willst du üben?</div>
+    <div class="modes">
+      <button class="mode" id="mode-write"><b>Schreiben</b><span>Du siehst Deutsch und tippst das englische Wort.</span></button>
+      <button class="mode" id="mode-cards"><b>Karteikarten</b><span>Du siehst Englisch, denkst nach und drehst um.</span></button>
+    </div>
+    <div class="note">Jede Runde hat 10 Wörter. Wörter, die du oft falsch hast, kommen öfter dran.</div>
+  </section>
+
+  <section id="view-session" hidden>
+    <div class="sheet">
+      <div class="topbar">
+        <button class="btn ghost" id="quit">Beenden</button>
+        <span class="muted" id="counter" style="font-variant-numeric:tabular-nums"></span>
+      </div>
+      <div class="progress"><i id="bar"></i></div>
+      <div class="card">
+        <div class="label" id="cardLabel"></div>
+        <div class="prompt" id="prompt"></div>
+        <div class="answer" id="revealed" hidden></div>
+        <button class="speak" id="speak" hidden>▶ Anhören</button>
+      </div>
+      <form id="writeForm" class="row" autocomplete="off">
+        <input class="textIn" id="answer" placeholder="Auf Englisch …" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Deine Antwort">
+        <div class="row" style="width:100%">
+          <button class="btn" type="submit" id="check">Prüfen</button>
+          <button class="btn ghost" type="button" id="skip">Weiß ich nicht</button>
+        </div>
+      </form>
+      <div id="feedback" class="feedback" hidden></div>
+      <button class="btn green" id="next" hidden>Weiter</button>
+      <div id="cardControls" class="row" hidden><button class="btn" id="flip">Umdrehen</button></div>
+      <div id="rateControls" class="row" hidden>
+        <button class="btn green" id="knew">Gewusst</button>
+        <button class="btn ghost" id="didnt">Nicht gewusst</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-result" class="sheet" hidden>
+    <div class="big" id="score"></div>
+    <h2 id="resultTitle"></h2>
+    <div id="resultList" class="muted"></div>
+    <div class="row">
+      <button class="btn green" id="again">Noch eine Runde</button>
+      <button class="btn ghost" id="home">Zurück</button>
+    </div>
+  </section>
+
+  <section id="view-list" class="sheet" hidden>
+    <div class="row" style="justify-content:space-between">
+      <h2>Alle Wörter</h2>
+      <span class="note">Punkte = wie gut das Wort sitzt</span>
+    </div>
+    <div id="listBody"></div>
+  </section>
+
+  <section id="view-profile" class="sheet" hidden>
+    <h2>Wer übt gerade?</h2>
+    <ul class="profiles" id="profileList"></ul>
+    <div class="row">
+      <button class="btn ghost" id="addProfile">+ Neues Profil</button>
+    </div>
+    <div class="label" style="margin-top:6px">Für das aktuelle Profil</div>
+    <div class="row">
+      <button class="btn danger" id="resetBtn">Lernstand zurücksetzen</button>
+      <button class="btn danger" id="deleteBtn">Profil löschen</button>
+    </div>
+    <div id="confirmBox" class="feedback no" hidden>
+      <span id="confirmText"></span>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="confirmYes">Ja, wirklich</button>
+        <button class="btn ghost" id="confirmNo">Nein</button>
+      </div>
+    </div>
+    <div class="note" id="vocabInfo"></div>
+  </section>
+</div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+
+/* ---------- storage ---------- */
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem("vh." + k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem("vh." + k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem("vh." + k); }catch(e){} }
+};
+try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
+
+let vocab = LS.get("vocab", {version:"", words:[]});
+let profiles = LS.get("profiles", []);
+let currentId = LS.get("current", null);
+let P = null; // {progress:{}, units:[]}
+let selectedUnits = null;
+
+function loadProfile(){
+  if (!profiles.find(p => p.id === currentId)) currentId = profiles[0] ? profiles[0].id : null;
+  LS.set("current", currentId);
+  P = currentId ? LS.get("p." + currentId, {progress:{}, units:null}) : null;
+  selectedUnits = P && P.units ? new Set(P.units) : null;
+}
+function saveProfile(){ if (currentId && P) LS.set("p." + currentId, P); }
+function prog(w){ return (P && P.progress[w.id]) || {box:1, seen:false}; }
+function curName(){ const p = profiles.find(p => p.id === currentId); return p ? p.name : ""; }
+
+/* ---------- vocab loading ---------- */
+async function fetchVocab(){
+  try{
+    const res = await fetch("vocab.json", {cache:"no-cache"});
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && Array.isArray(data.words)) { vocab = data; LS.set("vocab", data); renderAll(); }
+  }catch(e){}
+}
+
+/* ---------- answer checking ---------- */
+const CONTR = [["i'm","i am"],["you're","you are"],["we're","we are"],["they're","they are"],["it's","it is"],
+  ["what's","what is"],["here's","here is"],["that's","that is"],["she's","she is"],["he's","he is"],
+  ["don't","do not"],["isn't","is not"],["aren't","are not"],["can't","cannot"],["let's","let us"]];
+function norm(s){
+  let t = String(s||"").toLowerCase().replace(/[’‘`´]/g,"'").replace(/[.!?;:"…]/g," ").replace(/\s*,\s*/g,", ").replace(/\s+/g," ").trim();
+  t = t.replace(/\bcolor/g,"colour").replace(/\bfavorite/g,"favourite").replace(/\bmom\b/g,"mum");
+  for (const [a,b] of CONTR) t = t.replace(new RegExp("\\b" + a + "(?=\\s|$|,)","g"), b);
+  return t.replace(/,$/,"").trim();
+}
+function lev(a,b){const m=a.length,n=b.length;if(Math.abs(m-n)>2)return 3;const d=Array.from({length:m+1},(_,i)=>[i]);
+  for(let j=1;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n];}
+function judge(input, en){
+  const a = norm(input); if (!a) return "no";
+  const alts = [en, ...en.split(/\s*\/\s*/)].map(norm);
+  if (alts.includes(a)) return "ok";
+  const best = Math.min(...alts.map(x => lev(a,x)));
+  const len = norm(en).length;
+  if ((len >= 4 && best === 1) || (len >= 12 && best === 2)) return "near";
+  return "no";
+}
+const canSpeak = (() => { try{ return "speechSynthesis" in window; }catch(e){ return false; } })();
+function speakEn(text){
+  try{ const u = new SpeechSynthesisUtterance(text); u.lang = "en-GB"; u.rate = .9;
+    const v = speechSynthesis.getVoices().find(v => /en-GB/i.test(v.lang)); if (v) u.voice = v;
+    speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
+}
+function esc(s){ const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+function unitsOf(){ const s = new Set(vocab.words.map(v => String(v.unit || "?")));
+  return [...s].sort((a,b) => (parseFloat(a)||99) - (parseFloat(b)||99) || a.localeCompare(b)); }
+
+/* ---------- views ---------- */
+function show(view){
+  for (const v of ["welcome","practice","session","result","list","profile"]) $("view-" + v).hidden = v !== view;
+  $("nav").hidden = view === "welcome" && !profiles.length;
+  const tab = (view === "session" || view === "result") ? "practice" : view;
+  document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-current", b.dataset.view === tab));
+  if (view === "list") renderList();
+  if (view === "profile") renderProfiles();
+  if (view === "practice") renderHome();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => { S = null; show(b.dataset.view); });
+function renderAll(){
+  $("hello").textContent = curName() ? "Hallo " + curName() + "!" : "Vokabelheft";
+  if (!$("view-practice").hidden) renderHome();
+  if (!$("view-list").hidden) renderList();
+  if (!$("view-profile").hidden) renderProfiles();
+}
+
+/* ---------- profiles ---------- */
+let addingFromProfile = false;
+$("nameForm").onsubmit = e => {
+  e.preventDefault();
+  const name = $("nameIn").value.trim().slice(0,24); if (!name) return;
+  const id = "p" + Date.now().toString(36);
+  profiles.push({id, name}); LS.set("profiles", profiles);
+  currentId = id; loadProfile(); $("nameIn").value = "";
+  renderAll(); show("practice");
+};
+$("nameCancel").onclick = () => show("profile");
+$("addProfile").onclick = () => {
+  $("welcomeTitle").textContent = "Neues Profil: Wie heißt du?";
+  $("nameCancel").hidden = false; show("welcome"); setTimeout(() => $("nameIn").focus(), 30);
+};
+function renderProfiles(){
+  const ul = $("profileList"); ul.innerHTML = "";
+  for (const p of profiles){
+    const data = LS.get("p." + p.id, {progress:{}});
+    const sure = Object.values(data.progress || {}).filter(x => x.box >= 4).length;
+    const li = document.createElement("li");
+    const b = document.createElement("button"); b.className = "pick"; b.id = "pick-" + p.id;
+    b.setAttribute("aria-current", p.id === currentId);
+    b.innerHTML = esc(p.name) + "<span>" + sure + " Wörter sitzen</span>";
+    b.onclick = () => { currentId = p.id; loadProfile(); renderAll(); show("practice"); };
+    li.append(b); ul.append(li);
+  }
+  $("confirmBox").hidden = true;
+  $("vocabInfo").textContent = vocab.words.length + " Vokabeln" + (vocab.version ? ", Stand " + vocab.version.split("-").reverse().join(".") : "") + ". Alles bleibt auf diesem Gerät.";
+}
+let pendingAction = null;
+function ask(text, fn){ $("confirmText").textContent = text; pendingAction = fn; $("confirmBox").hidden = false; }
+$("resetBtn").onclick = () => ask("Lernstand von " + curName() + " wirklich auf null setzen?", () => { P.progress = {}; saveProfile(); renderProfiles(); });
+$("deleteBtn").onclick = () => ask("Profil " + curName() + " mit allem Lernstand löschen?", () => {
+  LS.del("p." + currentId); profiles = profiles.filter(p => p.id !== currentId); LS.set("profiles", profiles);
+  loadProfile(); renderAll();
+  if (!profiles.length) { $("welcomeTitle").textContent = "Hallo! Wie heißt du?"; $("nameCancel").hidden = true; show("welcome"); }
+  else renderProfiles();
+});
+$("confirmYes").onclick = () => { const f = pendingAction; pendingAction = null; $("confirmBox").hidden = true; if (f) f(); };
+$("confirmNo").onclick = () => { pendingAction = null; $("confirmBox").hidden = true; };
+
+/* ---------- practice home ---------- */
+function renderHome(){
+  if (!P) return;
+  const ws = vocab.words;
+  $("st-total").textContent = ws.length;
+  $("st-sure").textContent = ws.filter(w => prog(w).box >= 4).length;
+  $("st-new").textContent = ws.filter(w => !prog(w).seen).length;
+  const units = unitsOf();
+  if (!selectedUnits) selectedUnits = new Set(units);
+  const box = $("unitChips"); box.innerHTML = "";
+  if (!units.length) box.innerHTML = '<span class="muted">Die Vokabeln werden geladen …</span>';
+  for (const u of units){
+    const n = ws.filter(v => String(v.unit || "?") === u).length;
+    const c = document.createElement("button"); c.className = "chip"; c.id = "unit-" + u;
+    c.textContent = (u === "?" ? "Sonstige" : "Unit " + u) + " · " + n;
+    c.setAttribute("aria-pressed", selectedUnits.has(u));
+    c.onclick = () => { selectedUnits.has(u) ? selectedUnits.delete(u) : selectedUnits.add(u);
+      P.units = [...selectedUnits]; saveProfile(); renderHome(); };
+    box.append(c);
+  }
+  const pool = ws.filter(v => selectedUnits.has(String(v.unit || "?")));
+  $("mode-write").disabled = $("mode-cards").disabled = !pool.length;
+}
+
+/* ---------- session ---------- */
+let S = null;
+function pickRound(){
+  const pool = vocab.words.filter(v => selectedUnits.has(String(v.unit || "?")));
+  const now = Date.now();
+  return pool.map(v => {
+    const p = prog(v); let w = Math.pow(2, 5 - (p.box || 1)); if (!p.seen) w *= 1.5;
+    if (p.lastSeen && now - p.lastSeen < 10*60*1000) w *= .3;
+    return {v, k: Math.pow(Math.random(), 1/w)};
+  }).sort((a,b) => b.k - a.k).slice(0, 10).map(x => x.v);
+}
+function start(mode){
+  const round = pickRound(); if (!round.length) return;
+  S = {mode, round, i:0, results:[]}; show("session"); renderCard();
+}
+$("mode-write").onclick = () => start("write");
+$("mode-cards").onclick = () => start("cards");
+$("quit").onclick = () => { S = null; show("practice"); };
+
+function renderCard(){
+  const w = S.round[S.i];
+  $("counter").textContent = (S.i + 1) + " von " + S.round.length;
+  $("bar").style.width = (S.i / S.round.length * 100) + "%";
+  $("feedback").hidden = true; $("next").hidden = true; $("revealed").hidden = true; $("rateControls").hidden = true;
+  $("speak").hidden = true;
+  if (S.mode === "write"){
+    $("cardLabel").textContent = "Was heißt das auf Englisch?";
+    $("prompt").textContent = w.de;
+    $("writeForm").hidden = false; $("cardControls").hidden = true;
+    $("answer").value = ""; $("answer").disabled = false; $("check").disabled = false; $("skip").disabled = false;
+    setTimeout(() => $("answer").focus(), 30);
+  } else {
+    $("cardLabel").textContent = "Was heißt das auf Deutsch?";
+    $("prompt").textContent = w.en;
+    $("speak").hidden = !canSpeak;
+    $("writeForm").hidden = true; $("cardControls").hidden = false;
+  }
+}
+$("speak").onclick = () => speakEn(S.round[S.i].en);
+$("writeForm").onsubmit = e => { e.preventDefault(); if (!$("answer").value.trim()) return; grade(judge($("answer").value, S.round[S.i].en)); };
+$("skip").onclick = () => grade("no");
+function grade(res){
+  const w = S.round[S.i];
+  $("answer").disabled = true; $("check").disabled = true; $("skip").disabled = true;
+  const fb = $("feedback"); fb.hidden = false; fb.className = "feedback " + res;
+  const msg = res === "ok" ? "Richtig!" : res === "near" ? "Fast! Achte auf die Schreibweise:" : "Nicht ganz. Richtig ist:";
+  fb.innerHTML = esc(msg) + (res === "ok" ? "" : '<span class="correct">' + esc(w.en) + "</span>");
+  $("speak").hidden = !canSpeak; $("next").hidden = false; setTimeout(() => $("next").focus(), 30);
+  record(w, res);
+}
+$("next").onclick = nextCard;
+$("flip").onclick = () => { const w = S.round[S.i]; $("revealed").textContent = w.de; $("revealed").hidden = false; $("cardControls").hidden = true; $("rateControls").hidden = false; };
+$("knew").onclick = () => { record(S.round[S.i], "ok"); nextCard(); };
+$("didnt").onclick = () => { record(S.round[S.i], "no"); nextCard(); };
+document.addEventListener("keydown", e => {
+  if ($("view-session").hidden) return;
+  if (e.key === "Enter" && !$("next").hidden && document.activeElement !== $("next")) { e.preventDefault(); nextCard(); }
+});
+function record(w, res){
+  S.results.push({w, res});
+  const p = prog(w), box = p.box || 1;
+  P.progress[w.id] = {box: res === "ok" ? Math.min(5, box + 1) : res === "near" ? box : 1, seen:true, lastSeen:Date.now(),
+    right:(p.right||0) + (res === "ok" ? 1 : 0), wrong:(p.wrong||0) + (res === "ok" ? 0 : 1)};
+  saveProfile();
+}
+function nextCard(){ if (!S) return; S.i++; if (S.i >= S.round.length) return finish(); renderCard(); }
+function finish(){
+  const ok = S.results.filter(r => r.res === "ok").length, n = S.results.length;
+  $("score").textContent = ok + " / " + n;
+  $("resultTitle").textContent = ok === n ? "Alles richtig, super!" : ok >= n*.7 ? "Sehr gut gemacht!" : ok >= n*.4 ? "Gut, weiter so!" : "Dranbleiben, das wird!";
+  const miss = S.results.filter(r => r.res !== "ok");
+  $("resultList").innerHTML = miss.length ? "Noch üben: " + miss.map(r => "<b>" + esc(r.w.en) + "</b> (" + esc(r.w.de) + ")").join(", ") : "Keine Fehler in dieser Runde.";
+  show("result");
+}
+$("again").onclick = () => start(S ? S.mode : "write");
+$("home").onclick = () => show("practice");
+
+/* ---------- list ---------- */
+function renderList(){
+  const body = $("listBody"); body.innerHTML = "";
+  for (const u of unitsOf()){
+    const words = vocab.words.filter(v => String(v.unit || "?") === u);
+    const sec = document.createElement("div"); sec.className = "unit";
+    sec.innerHTML = "<h3><span>" + (u === "?" ? "Sonstige" : "Unit " + esc(u)) + '</span><span class="muted">' + words.length + "</span></h3>";
+    const ul = document.createElement("ul"); ul.className = "words";
+    for (const w of words){
+      const p = prog(w), lvl = p.seen ? (p.box || 1) : 0;
+      const li = document.createElement("li");
+      li.innerHTML = '<span class="en">' + esc(w.en) + "</span><span>" + esc(w.de) + '</span><span class="dots" aria-label="Stufe ' + lvl + ' von 5">' +
+        Array.from({length:5}, (_,i) => '<i class="' + (i < lvl ? "on" : "") + '"></i>').join("") + "</span>";
+      ul.append(li);
+    }
+    sec.append(ul); body.append(sec);
+  }
+}
+
+/* ---------- boot ---------- */
+loadProfile();
+renderAll();
+if (!profiles.length) show("welcome"); else show("practice");
+fetchVocab();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,791 @@
+{
+ "version": "2026-10-26",
+ "words": [
+  {
+   "id": "u1-i-m-from-greenwich",
+   "en": "I'm from Greenwich.",
+   "de": "Ich bin aus Greenwich.",
+   "unit": "1"
+  },
+  {
+   "id": "u1-look",
+   "en": "Look!",
+   "de": "Schau mal!",
+   "unit": "1"
+  },
+  {
+   "id": "u1-two-boys-and-a-dog",
+   "en": "two boys and a dog",
+   "de": "zwei Jungen und ein Hund",
+   "unit": "1"
+  },
+  {
+   "id": "u1-in-greenwich-park",
+   "en": "in Greenwich Park",
+   "de": "im Greenwich Park",
+   "unit": "1"
+  },
+  {
+   "id": "u1-dogs-are-my-friends-but-not-cats",
+   "en": "Dogs are my friends, but not cats.",
+   "de": "Hunde sind meine Freunde, aber Katzen nicht.",
+   "unit": "1"
+  },
+  {
+   "id": "u1-i-m-a-mouse",
+   "en": "I'm a mouse.",
+   "de": "Ich bin eine Maus.",
+   "unit": "1"
+  },
+  {
+   "id": "u1-mouse-mice",
+   "en": "mouse, mice",
+   "de": "Maus, Mäuse",
+   "unit": "1"
+  },
+  {
+   "id": "u1-here-s-your-ball",
+   "en": "Here's your ball.",
+   "de": "Hier ist dein Ball.",
+   "unit": "1"
+  },
+  {
+   "id": "u1-hello",
+   "en": "hello",
+   "de": "hallo",
+   "unit": "1"
+  },
+  {
+   "id": "u1-i-m-pia",
+   "en": "I'm Pia.",
+   "de": "Ich heiße Pia.",
+   "unit": "1"
+  },
+  {
+   "id": "u1-you-re-a-nice-dog",
+   "en": "You're a nice dog.",
+   "de": "Du bist ein lieber Hund.",
+   "unit": "1"
+  },
+  {
+   "id": "u1-what-s-your-name",
+   "en": "What's your name?",
+   "de": "Wie heißt du?",
+   "unit": "1"
+  },
+  {
+   "id": "u1-sorry",
+   "en": "Sorry!",
+   "de": "Entschuldigung!",
+   "unit": "1"
+  },
+  {
+   "id": "u1-my-dog-is-crazy",
+   "en": "My dog is crazy.",
+   "de": "Mein Hund ist verrückt.",
+   "unit": "1"
+  },
+  {
+   "id": "u1-my-name-is-luke",
+   "en": "My name is Luke.",
+   "de": "Mein Name ist Luke.",
+   "unit": "1"
+  },
+  {
+   "id": "u1-we-re-from-greenwich",
+   "en": "We're from Greenwich.",
+   "de": "Wir sind aus Greenwich.",
+   "unit": "1"
+  },
+  {
+   "id": "u1-where-are-you-from",
+   "en": "Where are you from?",
+   "de": "Woher kommst du?",
+   "unit": "1"
+  },
+  {
+   "id": "u1-are-you-on-holiday",
+   "en": "Are you on holiday?",
+   "de": "Bist du im Urlaub?",
+   "unit": "1"
+  },
+  {
+   "id": "u1-yes",
+   "en": "yes",
+   "de": "ja",
+   "unit": "1"
+  },
+  {
+   "id": "u1-i-m-here-with-my-parents",
+   "en": "I'm here with my parents.",
+   "de": "Ich bin mit meinen Eltern hier.",
+   "unit": "1"
+  },
+  {
+   "id": "u1-how-old-are-you",
+   "en": "How old are you?",
+   "de": "Wie alt bist du?",
+   "unit": "1"
+  },
+  {
+   "id": "u1-you-too",
+   "en": "You too?",
+   "de": "Du auch?",
+   "unit": "1"
+  },
+  {
+   "id": "u1-no",
+   "en": "no",
+   "de": "nein",
+   "unit": "1"
+  },
+  {
+   "id": "u1-german",
+   "en": "German",
+   "de": "Deutsch",
+   "unit": "1"
+  },
+  {
+   "id": "u1-different",
+   "en": "different",
+   "de": "anders",
+   "unit": "1"
+  },
+  {
+   "id": "u1-i-m-english",
+   "en": "I'm English.",
+   "de": "Ich bin Engländerin.",
+   "unit": "1"
+  },
+  {
+   "id": "u2-i-love-dogs",
+   "en": "I love dogs.",
+   "de": "Ich liebe Hunde.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-dogs-love-squirrels",
+   "en": "Dogs love squirrels.",
+   "de": "Hunde lieben Eichhörnchen.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-that-was-close",
+   "en": "That was close.",
+   "de": "Das war knapp.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-animal",
+   "en": "animal",
+   "de": "Tier",
+   "unit": "2"
+  },
+  {
+   "id": "u2-thank-you",
+   "en": "thank you",
+   "de": "danke",
+   "unit": "2"
+  },
+  {
+   "id": "u2-this-is-pia",
+   "en": "This is Pia.",
+   "de": "Das ist Pia.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-a-girl-from-germany",
+   "en": "a girl from Germany",
+   "de": "ein Mädchen aus Deutschland",
+   "unit": "2"
+  },
+  {
+   "id": "u2-school",
+   "en": "school",
+   "de": "Schule",
+   "unit": "2"
+  },
+  {
+   "id": "u2-greenwich-park-is-big",
+   "en": "Greenwich Park is big.",
+   "de": "Der Greenwich Park ist groß.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-it-s-great-for-cycling",
+   "en": "It's great for cycling.",
+   "de": "Er ist super zum Radfahren.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-i-don-t-like-cycling",
+   "en": "I don't like cycling.",
+   "de": "Ich fahre nicht gern Rad.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-my-favourite-sport-is-football",
+   "en": "My favourite sport is football.",
+   "de": "Mein Lieblingssport ist Fußball.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-i-like-the-boating-lake",
+   "en": "I like the boating lake.",
+   "de": "Ich mag den See mit den Booten.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-what-s-that",
+   "en": "What's that?",
+   "de": "Was ist das?",
+   "unit": "2"
+  },
+  {
+   "id": "u2-let-s-go",
+   "en": "Let's go!",
+   "de": "Los geht's!",
+   "unit": "2"
+  },
+  {
+   "id": "u2-it-s-fun",
+   "en": "It's fun.",
+   "de": "Es macht Spaß.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-puzzle",
+   "en": "puzzle",
+   "de": "Rätsel",
+   "unit": "2"
+  },
+  {
+   "id": "u2-rat",
+   "en": "rat",
+   "de": "Ratte",
+   "unit": "2"
+  },
+  {
+   "id": "u2-i-m-not-scared-of-dogs",
+   "en": "I'm not scared of dogs.",
+   "de": "Ich habe keine Angst vor Hunden.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-i-m-scared-of-cats",
+   "en": "I'm scared of cats.",
+   "de": "Ich habe Angst vor Katzen.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-worms-are-ok",
+   "en": "Worms are OK.",
+   "de": "Würmer sind OK.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-rabbits-are-nice",
+   "en": "Rabbits are nice.",
+   "de": "Kaninchen sind nett.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-they-re-my-friends",
+   "en": "They're my friends.",
+   "de": "Sie sind meine Freunde.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-they-don-t-eat-mice",
+   "en": "They don't eat mice.",
+   "de": "Sie essen keine Mäuse.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-word",
+   "en": "word",
+   "de": "Wort",
+   "unit": "2"
+  },
+  {
+   "id": "u2-inline-skating-is-great",
+   "en": "Inline skating is great.",
+   "de": "Inlineskaten ist toll.",
+   "unit": "2"
+  },
+  {
+   "id": "u2-volleyball-is-a-great-sport",
+   "en": "Volleyball is a great sport.",
+   "de": "Volleyball ist ein toller Sport.",
+   "unit": "2"
+  },
+  {
+   "id": "u3-the-same",
+   "en": "the same",
+   "de": "das gleiche",
+   "unit": "3"
+  },
+  {
+   "id": "u3-colour",
+   "en": "colour",
+   "de": "Farbe",
+   "unit": "3"
+  },
+  {
+   "id": "u3-what-s-your-favourite-colour",
+   "en": "What's your favourite colour?",
+   "de": "Was ist deine Lieblingsfarbe?",
+   "unit": "3"
+  },
+  {
+   "id": "u3-please",
+   "en": "please",
+   "de": "bitte",
+   "unit": "3"
+  },
+  {
+   "id": "u3-can-you-name-four-sports",
+   "en": "Can you name four sports?",
+   "de": "Kannst du vier Sportarten nennen?",
+   "unit": "3"
+  },
+  {
+   "id": "u3-say-your-phone-number",
+   "en": "Say your phone number.",
+   "de": "Sag deine Telefonnummer.",
+   "unit": "3"
+  },
+  {
+   "id": "u3-what-colour-is-sherlock",
+   "en": "What colour is Sherlock?",
+   "de": "Welche Farbe hat Sherlock?",
+   "unit": "3"
+  },
+  {
+   "id": "u3-alphabet",
+   "en": "alphabet",
+   "de": "Alphabet",
+   "unit": "3"
+  },
+  {
+   "id": "u3-rap-like-me",
+   "en": "Rap like me.",
+   "de": "Rappe wie ich.",
+   "unit": "3"
+  },
+  {
+   "id": "u3-i-love-you",
+   "en": "I love you.",
+   "de": "Ich liebe dich.",
+   "unit": "3"
+  },
+  {
+   "id": "u3-picture",
+   "en": "picture",
+   "de": "Bild, Foto",
+   "unit": "3"
+  },
+  {
+   "id": "u3-people",
+   "en": "people",
+   "de": "Menschen, Leute",
+   "unit": "3"
+  },
+  {
+   "id": "u3-thing",
+   "en": "thing",
+   "de": "Ding, Sache",
+   "unit": "3"
+  },
+  {
+   "id": "u3-number",
+   "en": "number",
+   "de": "Nummer, Zahl",
+   "unit": "3"
+  },
+  {
+   "id": "u3-boat-number-eight-is-pink",
+   "en": "Boat number eight is pink.",
+   "de": "Boot Nummer acht ist rosa.",
+   "unit": "3"
+  },
+  {
+   "id": "u3-i-can-see-sherlock",
+   "en": "I can see Sherlock.",
+   "de": "Ich kann Sherlock sehen.",
+   "unit": "3"
+  },
+  {
+   "id": "u3-four-and-six-is-ten",
+   "en": "Four and six is ten.",
+   "de": "Vier plus sechs ist zehn.",
+   "unit": "3"
+  },
+  {
+   "id": "u4-at-home",
+   "en": "at home",
+   "de": "zu Hause",
+   "unit": "4"
+  },
+  {
+   "id": "u4-family",
+   "en": "family",
+   "de": "Familie",
+   "unit": "4"
+  },
+  {
+   "id": "u4-live",
+   "en": "live",
+   "de": "wohnen, leben",
+   "unit": "4"
+  },
+  {
+   "id": "u4-flat",
+   "en": "flat",
+   "de": "Wohnung",
+   "unit": "4"
+  },
+  {
+   "id": "u4-in-the-street",
+   "en": "in the street",
+   "de": "in der Straße",
+   "unit": "4"
+  },
+  {
+   "id": "u4-house",
+   "en": "house",
+   "de": "Haus",
+   "unit": "4"
+  },
+  {
+   "id": "u4-door",
+   "en": "door",
+   "de": "Tür",
+   "unit": "4"
+  },
+  {
+   "id": "u4-tv",
+   "en": "TV",
+   "de": "Fernseher",
+   "unit": "4"
+  },
+  {
+   "id": "u4-chair",
+   "en": "chair",
+   "de": "Stuhl",
+   "unit": "4"
+  },
+  {
+   "id": "u4-table",
+   "en": "table",
+   "de": "Tisch",
+   "unit": "4"
+  },
+  {
+   "id": "u4-shower",
+   "en": "shower",
+   "de": "Dusche",
+   "unit": "4"
+  },
+  {
+   "id": "u4-bath",
+   "en": "bath",
+   "de": "Badewanne",
+   "unit": "4"
+  },
+  {
+   "id": "u4-toilet",
+   "en": "toilet",
+   "de": "Toilette",
+   "unit": "4"
+  },
+  {
+   "id": "u4-bed",
+   "en": "bed",
+   "de": "Bett",
+   "unit": "4"
+  },
+  {
+   "id": "u4-clock",
+   "en": "clock",
+   "de": "Uhr",
+   "unit": "4"
+  },
+  {
+   "id": "u4-wardrobe",
+   "en": "wardrobe",
+   "de": "Kleiderschrank",
+   "unit": "4"
+  },
+  {
+   "id": "u4-cupboard",
+   "en": "cupboard",
+   "de": "Schrank, Küchenschrank",
+   "unit": "4"
+  },
+  {
+   "id": "u4-cooker",
+   "en": "cooker",
+   "de": "Herd",
+   "unit": "4"
+  },
+  {
+   "id": "u4-living-room",
+   "en": "living room",
+   "de": "Wohnzimmer",
+   "unit": "4"
+  },
+  {
+   "id": "u4-bedroom",
+   "en": "bedroom",
+   "de": "Schlafzimmer",
+   "unit": "4"
+  },
+  {
+   "id": "u4-kitchen",
+   "en": "kitchen",
+   "de": "Küche",
+   "unit": "4"
+  },
+  {
+   "id": "u4-bathroom",
+   "en": "bathroom",
+   "de": "Badezimmer",
+   "unit": "4"
+  },
+  {
+   "id": "u4-good",
+   "en": "good",
+   "de": "gut",
+   "unit": "4"
+  },
+  {
+   "id": "u4-biscuit",
+   "en": "biscuit",
+   "de": "Keks",
+   "unit": "4"
+  },
+  {
+   "id": "u4-under",
+   "en": "under",
+   "de": "unter",
+   "unit": "4"
+  },
+  {
+   "id": "u4-help",
+   "en": "help",
+   "de": "helfen",
+   "unit": "4"
+  },
+  {
+   "id": "u4-collect",
+   "en": "collect",
+   "de": "sammeln",
+   "unit": "4"
+  },
+  {
+   "id": "u4-new",
+   "en": "new",
+   "de": "neu",
+   "unit": "4"
+  },
+  {
+   "id": "u4-small",
+   "en": "small",
+   "de": "klein",
+   "unit": "4"
+  },
+  {
+   "id": "u5-sister",
+   "en": "sister",
+   "de": "Schwester",
+   "unit": "5"
+  },
+  {
+   "id": "u5-little",
+   "en": "little",
+   "de": "klein",
+   "unit": "5"
+  },
+  {
+   "id": "u5-brother",
+   "en": "brother",
+   "de": "Bruder",
+   "unit": "5"
+  },
+  {
+   "id": "u5-father",
+   "en": "father",
+   "de": "Vater",
+   "unit": "5"
+  },
+  {
+   "id": "u5-mother",
+   "en": "mother",
+   "de": "Mutter",
+   "unit": "5"
+  },
+  {
+   "id": "u5-cousin",
+   "en": "cousin",
+   "de": "Cousin, Cousine",
+   "unit": "5"
+  },
+  {
+   "id": "u5-a-an",
+   "en": "a / an",
+   "de": "ein, eine",
+   "unit": "5"
+  },
+  {
+   "id": "u5-only-child",
+   "en": "only child",
+   "de": "Einzelkind",
+   "unit": "5"
+  },
+  {
+   "id": "u5-dad",
+   "en": "dad",
+   "de": "Papa",
+   "unit": "5"
+  },
+  {
+   "id": "u5-mum",
+   "en": "mum",
+   "de": "Mama",
+   "unit": "5"
+  },
+  {
+   "id": "u5-uncle",
+   "en": "uncle",
+   "de": "Onkel",
+   "unit": "5"
+  },
+  {
+   "id": "u5-aunt",
+   "en": "aunt",
+   "de": "Tante",
+   "unit": "5"
+  },
+  {
+   "id": "u5-she-s",
+   "en": "she's",
+   "de": "sie ist",
+   "unit": "5"
+  },
+  {
+   "id": "u5-isn-t",
+   "en": "isn't",
+   "de": "ist nicht",
+   "unit": "5"
+  },
+  {
+   "id": "u5-always",
+   "en": "always",
+   "de": "immer, ständig",
+   "unit": "5"
+  },
+  {
+   "id": "u5-easy",
+   "en": "easy",
+   "de": "leicht, einfach",
+   "unit": "5"
+  },
+  {
+   "id": "u5-he-s",
+   "en": "he's",
+   "de": "er ist",
+   "unit": "5"
+  },
+  {
+   "id": "u5-grandad",
+   "en": "grandad / grandfather",
+   "de": "Opa",
+   "unit": "5"
+  },
+  {
+   "id": "u5-grandma",
+   "en": "grandma / grandmother",
+   "de": "Oma",
+   "unit": "5"
+  },
+  {
+   "id": "u5-family-tree",
+   "en": "family tree",
+   "de": "Stammbaum",
+   "unit": "5"
+  },
+  {
+   "id": "u5-tell-me-about",
+   "en": "Tell me about ...",
+   "de": "Erzähl mir von ...",
+   "unit": "5"
+  },
+  {
+   "id": "u6-guinea-pig",
+   "en": "guinea pig",
+   "de": "Meerschweinchen",
+   "unit": "6"
+  },
+  {
+   "id": "u6-quiet",
+   "en": "quiet",
+   "de": "leise, still",
+   "unit": "6"
+  },
+  {
+   "id": "u6-language",
+   "en": "language",
+   "de": "Sprache",
+   "unit": "6"
+  },
+  {
+   "id": "u6-only",
+   "en": "only",
+   "de": "nur",
+   "unit": "6"
+  },
+  {
+   "id": "u6-wrong",
+   "en": "wrong",
+   "de": "falsch",
+   "unit": "6"
+  },
+  {
+   "id": "u6-thanks",
+   "en": "thanks",
+   "de": "danke (kurz)",
+   "unit": "6"
+  },
+  {
+   "id": "u6-very",
+   "en": "very",
+   "de": "sehr",
+   "unit": "6"
+  },
+  {
+   "id": "u6-some",
+   "en": "some",
+   "de": "einige",
+   "unit": "6"
+  },
+  {
+   "id": "u6-of",
+   "en": "of",
+   "de": "von",
+   "unit": "6"
+  },
+  {
+   "id": "u6-say-hello",
+   "en": "say hello",
+   "de": "grüßen, Hallo sagen",
+   "unit": "6"
+  },
+  {
+   "id": "u6-to",
+   "en": "to",
+   "de": "zu, nach, auf",
+   "unit": "6"
+  }
+ ]
+}
