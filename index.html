@@ -10,113 +10,49 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Vokabeln">
 <meta name="theme-color" content="#2f9a4f">
-<style>
-:root{
-  --paper:#f4f7fc; --sheet:#ffffff; --ink:#1f2f86; --cover:#2f9a4f; --tab:#f3a59c;
-  --line:#d9e1f1; --fg:#1b2033; --muted:#5d6681; --bad:#cf3f33; --warn:#b7791f;
-  --display:ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; --body:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){:root{
-  --paper:#11162a; --sheet:#1a2038; --ink:#9db0ff; --cover:#59c878; --tab:#f0a197;
-  --line:#2b3456; --fg:#e7ebf8; --muted:#9aa3c0; --bad:#ff7a6e; --warn:#f2b55a; color-scheme:dark}}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
-  padding-top:calc(12px + env(safe-area-inset-top,0px));padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
-[hidden]{display:none!important}
-.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
-h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
-h1{font-size:1.75rem;color:var(--ink);font-weight:800}
-h2{font-size:1.3rem;font-weight:800}
-.muted{color:var(--muted)}
-button,input{font:inherit;color:inherit}
-button{cursor:pointer;-webkit-tap-highlight-color:transparent}
-:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
-header .sub{font-size:.9rem}
-nav{display:grid;grid-template-columns:repeat(3,1fr);background:var(--sheet);border:2px solid var(--line);border-radius:14px;padding:4px;gap:4px}
-nav button{border:0;background:transparent;border-radius:10px;padding:10px 6px;font-weight:800;color:var(--muted)}
-nav button[aria-current="true"]{background:var(--ink);color:var(--sheet)}
-.sheet{background:var(--sheet);border:2px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px}
-.label{font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 14px;font-weight:700}
-.chip[aria-pressed="true"]{border-color:var(--cover);background:color-mix(in srgb,var(--cover) 16%,var(--sheet))}
-.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media (max-width:420px){.modes{grid-template-columns:1fr}}
-.mode{text-align:left;border:2px solid var(--line);background:var(--paper);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px}
-.mode b{font-family:var(--display);font-size:1.15rem;color:var(--ink)}
-.mode span{font-size:.9rem;color:var(--muted)}
-.mode:disabled{opacity:.5}
-.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:800;background:var(--ink);color:var(--sheet)}
-.btn.green{background:var(--cover);color:#fff}
-.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
-.btn.danger{background:transparent;color:var(--bad);border:2px solid var(--line)}
-.btn:disabled{opacity:.5;cursor:default}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.stats{display:flex;gap:18px;flex-wrap:wrap;font-size:.92rem}
-.stats b{font-family:var(--display);font-size:1.3rem;color:var(--ink);font-variant-numeric:tabular-nums}
-.card{position:relative;background:var(--sheet);border:2px solid var(--line);border-radius:16px;padding:28px 20px 22px 44px;
-  background-image:repeating-linear-gradient(to bottom,transparent 0 35px,var(--line) 35px 36px);
-  min-height:190px;display:flex;flex-direction:column;justify-content:center;gap:10px}
-.card::before{content:"";position:absolute;left:28px;top:0;bottom:0;width:2px;background:var(--tab);opacity:.8}
-.card .prompt{font-family:var(--display);font-weight:800;font-size:1.7rem;line-height:1.2;overflow-wrap:anywhere}
-.card .answer{font-family:var(--display);font-weight:600;font-size:1.35rem;color:var(--ink);overflow-wrap:anywhere}
-.progress{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
-.progress i{display:block;height:100%;background:var(--cover);width:0;transition:width .3s}
-.textIn{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;font-size:1.2rem;background:var(--paper)}
-.textIn:focus{border-color:var(--ink);outline:none}
-.feedback{border-radius:12px;padding:12px 14px;font-weight:700}
-.feedback.ok{background:color-mix(in srgb,var(--cover) 18%,var(--sheet))}
-.feedback.near{background:color-mix(in srgb,var(--warn) 18%,var(--sheet))}
-.feedback.no{background:color-mix(in srgb,var(--bad) 15%,var(--sheet))}
-.feedback .correct{font-family:var(--display);font-size:1.2rem;color:var(--ink);display:block}
-.speak{border:2px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 12px;font-weight:700;font-size:.9rem;color:var(--ink);align-self:flex-start}
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.big{font-family:var(--display);font-size:3rem;font-weight:800;color:var(--cover);line-height:1}
-.unit h3{font-size:1.05rem;color:var(--ink);display:flex;justify-content:space-between;gap:8px}
-.words{list-style:none;margin:0;padding:0}
-.words li{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
-.words li>span{min-width:0;overflow-wrap:anywhere}
-.words .en{font-weight:800}
-.dots{display:flex;gap:3px}
-.dots i{width:7px;height:7px;border-radius:50%;background:var(--line)}
-.dots i.on{background:var(--cover)}
-.profiles{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-.profiles li{display:flex;align-items:center;gap:10px}
-.profiles .pick{flex:1;text-align:left;border:2px solid var(--line);background:var(--paper);border-radius:12px;padding:10px 14px;font-weight:800;display:flex;justify-content:space-between;gap:8px}
-.profiles .pick[aria-current="true"]{border-color:var(--cover);background:color-mix(in srgb,var(--cover) 14%,var(--sheet))}
-.profiles .pick span{font-weight:600;color:var(--muted);font-size:.88rem}
-.note{font-size:.88rem;color:var(--muted)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1 id="hello">Vokabelheft</h1>
-    <div class="sub muted" id="subline">Englisch üben, Wort für Wort</div>
+    <div>
+      <h1 id="hello">Vokabelheft</h1>
+      <div class="sub muted" id="subline">Englisch üben, Wort für Wort</div>
+    </div>
+    <span class="sync" id="sync" hidden><i></i><span id="syncText"></span></span>
   </header>
 
-  <!-- WELCOME / NEW PROFILE -->
-  <section id="view-welcome" class="sheet" hidden>
-    <h2 id="welcomeTitle">Hallo! Wie heißt du?</h2>
-    <p class="muted" style="margin:0">Dein Name bleibt nur auf diesem Gerät. Hier wird gespeichert, welche Wörter du schon kannst.</p>
-    <form id="nameForm" class="row" autocomplete="off">
-      <input class="textIn" id="nameIn" maxlength="24" placeholder="Vorname" aria-label="Vorname" required>
-      <button class="btn green" type="submit" id="nameGo">Los geht's</button>
-      <button class="btn ghost" type="button" id="nameCancel" hidden>Abbrechen</button>
+  <!-- LOGIN -->
+  <section id="view-login" class="sheet" hidden>
+    <h2>Anmelden</h2>
+    <form id="loginForm" class="row" autocomplete="on">
+      <div class="field">
+        <label class="label" for="userIn">Benutzername</label>
+        <input class="textIn" id="userIn" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+      </div>
+      <div class="field">
+        <label class="label" for="pinIn">PIN</label>
+        <input class="textIn" id="pinIn" type="password" inputmode="numeric" autocomplete="current-password" required>
+      </div>
+      <button class="btn green" type="submit" id="loginBtn">Anmelden</button>
     </form>
+    <div class="feedback no" id="loginError" hidden></div>
+    <p class="note">Benutzername und PIN bekommst du von deinen Eltern.</p>
   </section>
 
-  <nav aria-label="Bereiche" id="nav">
+  <section id="view-loading" class="sheet" hidden><p class="muted">Lade deine Vokabeln …</p></section>
+
+  <nav aria-label="Bereiche" id="nav" hidden>
     <button id="tab-practice" data-view="practice" aria-current="true">Üben</button>
     <button id="tab-list" data-view="list" aria-current="false">Wörter</button>
-    <button id="tab-profile" data-view="profile" aria-current="false">Profil</button>
+    <button id="tab-profile" data-view="profile" aria-current="false">Ich</button>
   </nav>
 
   <section id="view-practice" class="sheet" hidden>
+    <div id="migrateBox" class="feedback info" hidden>
+      <span>Auf diesem Gerät gibt es noch Lernstand aus der alten Version. Welcher gehört dir?</span>
+      <div class="row" id="migrateChoices" style="margin-top:10px"></div>
+    </div>
     <div class="stats">
       <div><b id="st-total">0</b> Wörter</div>
       <div><b id="st-sure">0</b> sitzen schon</div>
@@ -181,32 +117,29 @@ nav button[aria-current="true"]{background:var(--ink);color:var(--sheet)}
   </section>
 
   <section id="view-profile" class="sheet" hidden>
-    <h2>Wer übt gerade?</h2>
-    <ul class="profiles" id="profileList"></ul>
+    <h2 id="profileName"></h2>
+    <p class="muted" id="profileUser"></p>
+    <p id="profileSync"></p>
     <div class="row">
-      <button class="btn ghost" id="addProfile">+ Neues Profil</button>
+      <button class="btn ghost" id="refreshBtn">Neue Vokabeln laden</button>
+      <a class="btn ghost" id="adminLink" href="admin.html" hidden style="text-decoration:none">Verwaltung</a>
+      <button class="btn danger" id="logoutBtn">Abmelden</button>
     </div>
-    <div class="label" style="margin-top:6px">Für das aktuelle Profil</div>
-    <div class="row">
-      <button class="btn danger" id="resetBtn">Lernstand zurücksetzen</button>
-      <button class="btn danger" id="deleteBtn">Profil löschen</button>
-    </div>
-    <div id="confirmBox" class="feedback no" hidden>
-      <span id="confirmText"></span>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="confirmYes">Ja, wirklich</button>
-        <button class="btn ghost" id="confirmNo">Nein</button>
-      </div>
-    </div>
-    <div class="note" id="vocabInfo"></div>
+    <p class="note">Wenn mehrere Kinder dieses Gerät benutzen: abmelden, dann meldet sich das nächste Kind an.</p>
   </section>
 </div>
 
+<script src="lib/supabase.js"></script>
+<script src="config.js"></script>
 <script>
 (() => {
 const $ = id => document.getElementById(id);
+const CFG = window.VOKABELHEFT_CONFIG || {};
+const sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, {
+  auth: { persistSession: true, autoRefreshToken: true, storageKey: "vh.auth" }
+});
 
-/* ---------- storage ---------- */
+/* ---------- local storage (cache + offline queue) ---------- */
 const LS = {
   get(k, d){ try{ const v = localStorage.getItem("vh." + k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
   set(k, v){ try{ localStorage.setItem("vh." + k, JSON.stringify(v)); }catch(e){} },
@@ -214,31 +147,11 @@ const LS = {
 };
 try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
 
-let vocab = LS.get("vocab", {version:"", words:[]});
-let profiles = LS.get("profiles", []);
-let currentId = LS.get("current", null);
-let P = null; // {progress:{}, units:[]}
+let user = null;         // {id, username, display_name, role}
+let vocab = [];          // [{id, unit, en, de, sort}]
+let progress = {};       // word_id -> {box, right_count, wrong_count, last_seen}
+let queue = {};          // word_id -> row waiting for upload
 let selectedUnits = null;
-
-function loadProfile(){
-  if (!profiles.find(p => p.id === currentId)) currentId = profiles[0] ? profiles[0].id : null;
-  LS.set("current", currentId);
-  P = currentId ? LS.get("p." + currentId, {progress:{}, units:null}) : null;
-  selectedUnits = P && P.units ? new Set(P.units) : null;
-}
-function saveProfile(){ if (currentId && P) LS.set("p." + currentId, P); }
-function prog(w){ return (P && P.progress[w.id]) || {box:1, seen:false}; }
-function curName(){ const p = profiles.find(p => p.id === currentId); return p ? p.name : ""; }
-
-/* ---------- vocab loading ---------- */
-async function fetchVocab(){
-  try{
-    const res = await fetch("vocab.json", {cache:"no-cache"});
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data && Array.isArray(data.words)) { vocab = data; LS.set("vocab", data); renderAll(); }
-  }catch(e){}
-}
 
 /* ---------- answer checking ---------- */
 const CONTR = [["i'm","i am"],["you're","you are"],["we're","we are"],["they're","they are"],["it's","it is"],
@@ -263,107 +176,211 @@ function judge(input, en){
 }
 const canSpeak = (() => { try{ return "speechSynthesis" in window; }catch(e){ return false; } })();
 function speakEn(text){
-  try{ const u = new SpeechSynthesisUtterance(text); u.lang = "en-GB"; u.rate = .9;
+  try{ const u = new SpeechSynthesisUtterance(text.split(" / ")[0]); u.lang = "en-GB"; u.rate = .9;
     const v = speechSynthesis.getVoices().find(v => /en-GB/i.test(v.lang)); if (v) u.voice = v;
     speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
 }
 function esc(s){ const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
-function unitsOf(){ const s = new Set(vocab.words.map(v => String(v.unit || "?")));
+function unitsOf(){ const s = new Set(vocab.map(v => String(v.unit || "?")));
   return [...s].sort((a,b) => (parseFloat(a)||99) - (parseFloat(b)||99) || a.localeCompare(b)); }
+function prog(w){ return progress[w.id] || null; }
 
 /* ---------- views ---------- */
+const VIEWS = ["login","loading","practice","session","result","list","profile"];
 function show(view){
-  for (const v of ["welcome","practice","session","result","list","profile"]) $("view-" + v).hidden = v !== view;
-  $("nav").hidden = view === "welcome" && !profiles.length;
+  for (const v of VIEWS) $("view-" + v).hidden = v !== view;
+  $("nav").hidden = ["login","loading"].includes(view);
   const tab = (view === "session" || view === "result") ? "practice" : view;
   document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-current", b.dataset.view === tab));
   if (view === "list") renderList();
-  if (view === "profile") renderProfiles();
+  if (view === "profile") renderProfile();
   if (view === "practice") renderHome();
   window.scrollTo(0,0);
 }
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => { S = null; show(b.dataset.view); });
-function renderAll(){
-  $("hello").textContent = curName() ? "Hallo " + curName() + "!" : "Vokabelheft";
-  if (!$("view-practice").hidden) renderHome();
-  if (!$("view-list").hidden) renderList();
-  if (!$("view-profile").hidden) renderProfiles();
+
+/* ---------- login ---------- */
+$("loginForm").onsubmit = async e => {
+  e.preventDefault();
+  const uname = $("userIn").value.trim().toLowerCase().replace(/\s+/g,"");
+  const pin = $("pinIn").value.trim();
+  if (!uname || !pin) return;
+  $("loginBtn").disabled = true; $("loginError").hidden = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email: uname + "@" + CFG.emailDomain, password: pin });
+  $("loginBtn").disabled = false;
+  if (error) {
+    $("loginError").textContent = navigator.onLine
+      ? "Benutzername oder PIN stimmt nicht. Probier es nochmal."
+      : "Zum Anmelden brauchst du Internet.";
+    $("loginError").hidden = false; return;
+  }
+  $("pinIn").value = "";
+  await startFor(data.user.id);
+};
+$("logoutBtn").onclick = async () => {
+  await flush();
+  if (Object.keys(queue).length && !confirmLogoutPending) {
+    confirmLogoutPending = true;
+    $("profileSync").textContent = "Achtung: Es sind noch Ergebnisse nicht gespeichert, weil kein Internet da ist. Nochmal auf „Abmelden“ tippen, um sie zu verwerfen.";
+    return;
+  }
+  confirmLogoutPending = false;
+  try { await sb.auth.signOut({ scope: "local" }); } catch(e) {}
+  if (user) { LS.del("u." + user.id + ".queue"); }
+  user = null; vocab = []; progress = {}; queue = {}; selectedUnits = null;
+  $("hello").textContent = "Vokabelheft"; $("sync").hidden = true;
+  show("login");
+};
+let confirmLogoutPending = false;
+
+/* ---------- loading data ---------- */
+async function startFor(uid){
+  show("loading");
+  const k = "u." + uid + ".";
+  user = LS.get(k + "profile", null) || { id: uid, display_name: "", username: "", role: "kid" };
+  vocab = LS.get("vocab", []);
+  progress = LS.get(k + "progress", {});
+  queue = LS.get(k + "queue", {});
+  selectedUnits = (() => { const u = LS.get(k + "units", null); return u ? new Set(u) : null; })();
+  if (vocab.length) afterLoad();
+  await refreshFromServer();
+  if (!vocab.length) {
+    $("view-loading").innerHTML = '<p class="muted">Die Vokabeln konnten nicht geladen werden. Beim ersten Mal braucht die App Internet.</p>';
+    return;
+  }
+  afterLoad();
+  flush();
+}
+async function refreshFromServer(){
+  if (!user) return false;
+  try {
+    const [p, v, pr] = await Promise.all([
+      sb.from("profiles").select("id,username,display_name,role").eq("id", user.id).single(),
+      sb.from("vocab").select("id,unit,en,de,sort").order("sort").order("id"),
+      sb.from("progress").select("word_id,box,right_count,wrong_count,last_seen").eq("user_id", user.id)
+    ]);
+    if (p.error || v.error || pr.error) throw (p.error || v.error || pr.error);
+    user = p.data; vocab = v.data;
+    const fresh = {};
+    for (const r of pr.data) fresh[r.word_id] = { box: r.box, right_count: r.right_count, wrong_count: r.wrong_count, last_seen: r.last_seen };
+    for (const [id, r] of Object.entries(queue)) fresh[id] = r;   // unsaved local results win
+    progress = fresh;
+    const k = "u." + user.id + ".";
+    LS.set(k + "profile", user); LS.set("vocab", vocab); LS.set(k + "progress", progress);
+    return true;
+  } catch (e) { return false; }
+}
+function afterLoad(){
+  $("hello").textContent = user.display_name ? "Hallo " + user.display_name + "!" : "Vokabelheft";
+  updateSync();
+  checkMigration();
+  if ($("view-practice").hidden && $("view-session").hidden && $("view-result").hidden && $("view-list").hidden && $("view-profile").hidden) show("practice");
+  else if (!$("view-practice").hidden) renderHome();
 }
 
-/* ---------- profiles ---------- */
-let addingFromProfile = false;
-$("nameForm").onsubmit = e => {
-  e.preventDefault();
-  const name = $("nameIn").value.trim().slice(0,24); if (!name) return;
-  const id = "p" + Date.now().toString(36);
-  profiles.push({id, name}); LS.set("profiles", profiles);
-  currentId = id; loadProfile(); $("nameIn").value = "";
-  renderAll(); show("practice");
-};
-$("nameCancel").onclick = () => show("profile");
-$("addProfile").onclick = () => {
-  $("welcomeTitle").textContent = "Neues Profil: Wie heißt du?";
-  $("nameCancel").hidden = false; show("welcome"); setTimeout(() => $("nameIn").focus(), 30);
-};
-function renderProfiles(){
-  const ul = $("profileList"); ul.innerHTML = "";
-  for (const p of profiles){
-    const data = LS.get("p." + p.id, {progress:{}});
-    const sure = Object.values(data.progress || {}).filter(x => x.box >= 4).length;
-    const li = document.createElement("li");
-    const b = document.createElement("button"); b.className = "pick"; b.id = "pick-" + p.id;
-    b.setAttribute("aria-current", p.id === currentId);
-    b.innerHTML = esc(p.name) + "<span>" + sure + " Wörter sitzen</span>";
-    b.onclick = () => { currentId = p.id; loadProfile(); renderAll(); show("practice"); };
-    li.append(b); ul.append(li);
-  }
-  $("confirmBox").hidden = true;
-  $("vocabInfo").textContent = vocab.words.length + " Vokabeln" + (vocab.version ? ", Stand " + vocab.version.split("-").reverse().join(".") : "") + ". Alles bleibt auf diesem Gerät.";
+/* ---------- saving progress (with offline queue) ---------- */
+let flushing = false, flushTimer = null;
+function saveLocal(){
+  if (!user) return;
+  const k = "u." + user.id + ".";
+  LS.set(k + "progress", progress); LS.set(k + "queue", queue);
 }
-let pendingAction = null;
-function ask(text, fn){ $("confirmText").textContent = text; pendingAction = fn; $("confirmBox").hidden = false; }
-$("resetBtn").onclick = () => ask("Lernstand von " + curName() + " wirklich auf null setzen?", () => { P.progress = {}; saveProfile(); renderProfiles(); });
-$("deleteBtn").onclick = () => ask("Profil " + curName() + " mit allem Lernstand löschen?", () => {
-  LS.del("p." + currentId); profiles = profiles.filter(p => p.id !== currentId); LS.set("profiles", profiles);
-  loadProfile(); renderAll();
-  if (!profiles.length) { $("welcomeTitle").textContent = "Hallo! Wie heißt du?"; $("nameCancel").hidden = true; show("welcome"); }
-  else renderProfiles();
+async function flush(){
+  if (!user || flushing) return;
+  const ids = Object.keys(queue); if (!ids.length) { updateSync(); return; }
+  flushing = true;
+  const sent = { ...queue };
+  const rows = ids.map(id => ({ user_id: user.id, word_id: id, ...sent[id], updated_at: new Date().toISOString() }));
+  try {
+    const { error } = await sb.from("progress").upsert(rows, { onConflict: "user_id,word_id" });
+    if (!error) {
+      // only drop entries that did not change while uploading
+      for (const id of ids) if (queue[id] === sent[id]) delete queue[id];
+      saveLocal();
+    }
+  } catch (e) {}
+  flushing = false; updateSync();
+}
+function scheduleFlush(){ clearTimeout(flushTimer); flushTimer = setTimeout(flush, 1500); }
+window.addEventListener("online", flush);
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState === "hidden") return flush();
+  // App wieder geöffnet: neue Vokabeln holen, aber nicht mitten in einer Runde
+  if (user && navigator.onLine && !S && await refreshFromServer()) afterLoad();
 });
-$("confirmYes").onclick = () => { const f = pendingAction; pendingAction = null; $("confirmBox").hidden = true; if (f) f(); };
-$("confirmNo").onclick = () => { pendingAction = null; $("confirmBox").hidden = true; };
+function updateSync(){
+  const n = Object.keys(queue).length;
+  $("sync").hidden = !user;
+  $("sync").classList.toggle("pending", n > 0);
+  $("syncText").textContent = n ? n + " wartet auf Internet" : "gespeichert";
+}
+
+/* ---------- migration from the old offline version ---------- */
+function checkMigration(){
+  const box = $("migrateBox");
+  if (!user || LS.get("u." + user.id + ".migrated", false)) { box.hidden = true; return; }
+  const old = (LS.get("profiles", []) || []).filter(p => {
+    const d = LS.get("p." + p.id, null); return d && d.progress && Object.keys(d.progress).length;
+  });
+  if (!old.length) { box.hidden = true; return; }
+  const wrap = $("migrateChoices"); wrap.innerHTML = "";
+  for (const p of old) {
+    const b = document.createElement("button"); b.className = "btn small green"; b.id = "migrate-" + p.id;
+    b.textContent = p.name + " übernehmen";
+    b.onclick = () => migrateFrom(p.id);
+    wrap.append(b);
+  }
+  const no = document.createElement("button"); no.className = "btn small ghost"; no.id = "migrate-none";
+  no.textContent = "Keiner davon";
+  no.onclick = () => { LS.set("u." + user.id + ".migrated", true); box.hidden = true; };
+  wrap.append(no);
+  box.hidden = false;
+}
+function migrateFrom(localId){
+  const d = LS.get("p." + localId, { progress: {} });
+  const known = new Set(vocab.map(w => w.id));
+  for (const [id, o] of Object.entries(d.progress || {})) {
+    if (!known.has(id)) continue;
+    const cur = progress[id];
+    if (cur && (cur.box || 1) >= (o.box || 1)) continue;
+    const row = { box: Math.max(1, Math.min(5, o.box || 1)), right_count: o.right || 0, wrong_count: o.wrong || 0,
+                  last_seen: o.lastSeen ? new Date(o.lastSeen).toISOString() : null };
+    progress[id] = row; queue[id] = row;
+  }
+  LS.set("u." + user.id + ".migrated", true);
+  saveLocal(); $("migrateBox").hidden = true; renderHome(); flush();
+}
 
 /* ---------- practice home ---------- */
 function renderHome(){
-  if (!P) return;
-  const ws = vocab.words;
-  $("st-total").textContent = ws.length;
-  $("st-sure").textContent = ws.filter(w => prog(w).box >= 4).length;
-  $("st-new").textContent = ws.filter(w => !prog(w).seen).length;
+  if (!user) return;
+  $("st-total").textContent = vocab.length;
+  $("st-sure").textContent = vocab.filter(w => (prog(w)?.box || 0) >= 4).length;
+  $("st-new").textContent = vocab.filter(w => !prog(w)).length;
   const units = unitsOf();
   if (!selectedUnits) selectedUnits = new Set(units);
   const box = $("unitChips"); box.innerHTML = "";
-  if (!units.length) box.innerHTML = '<span class="muted">Die Vokabeln werden geladen …</span>';
   for (const u of units){
-    const n = ws.filter(v => String(v.unit || "?") === u).length;
+    const n = vocab.filter(v => String(v.unit || "?") === u).length;
     const c = document.createElement("button"); c.className = "chip"; c.id = "unit-" + u;
     c.textContent = (u === "?" ? "Sonstige" : "Unit " + u) + " · " + n;
     c.setAttribute("aria-pressed", selectedUnits.has(u));
     c.onclick = () => { selectedUnits.has(u) ? selectedUnits.delete(u) : selectedUnits.add(u);
-      P.units = [...selectedUnits]; saveProfile(); renderHome(); };
+      LS.set("u." + user.id + ".units", [...selectedUnits]); renderHome(); };
     box.append(c);
   }
-  const pool = ws.filter(v => selectedUnits.has(String(v.unit || "?")));
+  const pool = vocab.filter(v => selectedUnits.has(String(v.unit || "?")));
   $("mode-write").disabled = $("mode-cards").disabled = !pool.length;
 }
 
 /* ---------- session ---------- */
 let S = null;
 function pickRound(){
-  const pool = vocab.words.filter(v => selectedUnits.has(String(v.unit || "?")));
+  const pool = vocab.filter(v => selectedUnits.has(String(v.unit || "?")));
   const now = Date.now();
   return pool.map(v => {
-    const p = prog(v); let w = Math.pow(2, 5 - (p.box || 1)); if (!p.seen) w *= 1.5;
-    if (p.lastSeen && now - p.lastSeen < 10*60*1000) w *= .3;
+    const p = prog(v); let w = Math.pow(2, 5 - (p ? p.box : 1)); if (!p) w *= 1.5;
+    if (p && p.last_seen && now - Date.parse(p.last_seen) < 10*60*1000) w *= .3;
     return {v, k: Math.pow(Math.random(), 1/w)};
   }).sort((a,b) => b.k - a.k).slice(0, 10).map(x => x.v);
 }
@@ -373,7 +390,7 @@ function start(mode){
 }
 $("mode-write").onclick = () => start("write");
 $("mode-cards").onclick = () => start("cards");
-$("quit").onclick = () => { S = null; show("practice"); };
+$("quit").onclick = () => { S = null; flush(); show("practice"); };
 
 function renderCard(){
   const w = S.round[S.i];
@@ -416,10 +433,15 @@ document.addEventListener("keydown", e => {
 });
 function record(w, res){
   S.results.push({w, res});
-  const p = prog(w), box = p.box || 1;
-  P.progress[w.id] = {box: res === "ok" ? Math.min(5, box + 1) : res === "near" ? box : 1, seen:true, lastSeen:Date.now(),
-    right:(p.right||0) + (res === "ok" ? 1 : 0), wrong:(p.wrong||0) + (res === "ok" ? 0 : 1)};
-  saveProfile();
+  const p = prog(w) || { box: 1, right_count: 0, wrong_count: 0 };
+  const row = {
+    box: res === "ok" ? Math.min(5, p.box + 1) : res === "near" ? p.box : 1,
+    right_count: p.right_count + (res === "ok" ? 1 : 0),
+    wrong_count: p.wrong_count + (res === "ok" ? 0 : 1),
+    last_seen: new Date().toISOString()
+  };
+  progress[w.id] = row; queue[w.id] = row;
+  saveLocal(); updateSync(); scheduleFlush();
 }
 function nextCard(){ if (!S) return; S.i++; if (S.i >= S.round.length) return finish(); renderCard(); }
 function finish(){
@@ -428,7 +450,7 @@ function finish(){
   $("resultTitle").textContent = ok === n ? "Alles richtig, super!" : ok >= n*.7 ? "Sehr gut gemacht!" : ok >= n*.4 ? "Gut, weiter so!" : "Dranbleiben, das wird!";
   const miss = S.results.filter(r => r.res !== "ok");
   $("resultList").innerHTML = miss.length ? "Noch üben: " + miss.map(r => "<b>" + esc(r.w.en) + "</b> (" + esc(r.w.de) + ")").join(", ") : "Keine Fehler in dieser Runde.";
-  show("result");
+  flush(); show("result");
 }
 $("again").onclick = () => start(S ? S.mode : "write");
 $("home").onclick = () => show("practice");
@@ -437,12 +459,12 @@ $("home").onclick = () => show("practice");
 function renderList(){
   const body = $("listBody"); body.innerHTML = "";
   for (const u of unitsOf()){
-    const words = vocab.words.filter(v => String(v.unit || "?") === u);
+    const words = vocab.filter(v => String(v.unit || "?") === u);
     const sec = document.createElement("div"); sec.className = "unit";
     sec.innerHTML = "<h3><span>" + (u === "?" ? "Sonstige" : "Unit " + esc(u)) + '</span><span class="muted">' + words.length + "</span></h3>";
     const ul = document.createElement("ul"); ul.className = "words";
     for (const w of words){
-      const p = prog(w), lvl = p.seen ? (p.box || 1) : 0;
+      const lvl = prog(w)?.box || 0;
       const li = document.createElement("li");
       li.innerHTML = '<span class="en">' + esc(w.en) + "</span><span>" + esc(w.de) + '</span><span class="dots" aria-label="Stufe ' + lvl + ' von 5">' +
         Array.from({length:5}, (_,i) => '<i class="' + (i < lvl ? "on" : "") + '"></i>').join("") + "</span>";
@@ -452,11 +474,35 @@ function renderList(){
   }
 }
 
+/* ---------- profile ---------- */
+function renderProfile(){
+  $("profileName").textContent = user.display_name || "Mein Profil";
+  $("profileUser").textContent = "Benutzername: " + (user.username || "");
+  const n = Object.keys(queue).length;
+  $("profileSync").textContent = n ? n + " Ergebnisse werden gespeichert, sobald Internet da ist." : "Dein Lernstand ist gespeichert.";
+  $("adminLink").hidden = user.role !== "admin";
+  confirmLogoutPending = false;
+}
+$("refreshBtn").onclick = async () => {
+  $("refreshBtn").disabled = true; $("refreshBtn").textContent = "Lade …";
+  await flush();
+  const ok = await refreshFromServer();
+  $("refreshBtn").disabled = false; $("refreshBtn").textContent = "Neue Vokabeln laden";
+  $("profileSync").textContent = ok ? "Aktuell: " + vocab.length + " Vokabeln." : "Gerade kein Internet. Probier es später nochmal.";
+  $("hello").textContent = user.display_name ? "Hallo " + user.display_name + "!" : "Vokabelheft";
+};
+
 /* ---------- boot ---------- */
-loadProfile();
-renderAll();
-if (!profiles.length) show("welcome"); else show("practice");
-fetchVocab();
+(async () => {
+  if (!CFG.supabaseUrl || CFG.supabaseUrl.includes("DEIN-PROJEKT")) {
+    show("loading");
+    $("view-loading").innerHTML = '<p class="muted">Die App ist noch nicht eingerichtet: In <code>config.js</code> fehlen die Supabase-Daten.</p>';
+    return;
+  }
+  const { data } = await sb.auth.getSession();
+  if (data && data.session) await startFor(data.session.user.id);
+  else show("login");
+})();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 })();
 </script>
