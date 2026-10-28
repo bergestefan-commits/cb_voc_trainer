@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vokabelheft Verwaltung</title>
+<link rel="stylesheet" href="style.css">
+<link rel="apple-touch-icon" href="icon-180.png">
+</head>
+<body>
+<div class="wrap wide">
+  <header>
+    <div>
+      <h1>Verwaltung</h1>
+      <div class="sub muted" id="who">Vokabelheft</div>
+    </div>
+    <div class="row">
+      <a class="btn ghost small" href="./" style="text-decoration:none">Zur App</a>
+      <button class="btn ghost small" id="logoutBtn" hidden>Abmelden</button>
+    </div>
+  </header>
+
+  <section id="view-login" class="sheet" hidden>
+    <h2>Als Admin anmelden</h2>
+    <form id="loginForm" class="row">
+      <div class="field"><label class="label" for="userIn">Benutzername</label>
+        <input class="textIn" id="userIn" autocomplete="username" autocapitalize="off" required></div>
+      <div class="field"><label class="label" for="pwIn">Passwort</label>
+        <input class="textIn" id="pwIn" type="password" autocomplete="current-password" required></div>
+      <button class="btn" type="submit" id="loginBtn">Anmelden</button>
+    </form>
+    <div class="feedback no" id="loginError" hidden></div>
+  </section>
+
+  <section id="view-denied" class="sheet" hidden>
+    <h2>Kein Zugriff</h2>
+    <p class="muted">Dieses Konto ist kein Admin. Die Verwaltung ist nur für Eltern.</p>
+  </section>
+
+  <div id="adminArea" hidden style="display:flex;flex-direction:column;gap:18px">
+    <section class="sheet">
+      <div class="row" style="justify-content:space-between">
+        <h2>Kinder</h2>
+        <button class="btn ghost small" id="reloadKids">Aktualisieren</button>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Anzeigename</th><th>Benutzername</th><th>Sitzen</th><th>Geübt</th><th>Zuletzt geübt</th></tr></thead>
+          <tbody id="kidsBody"></tbody>
+        </table>
+      </div>
+      <p class="note">Neue Kinder legst du im Supabase-Dashboard an (Authentication → Users → Add user) mit der E-Mail <code>benutzername@vokabelheft.local</code> und der PIN als Passwort. Anzeigenamen kannst du hier direkt ändern.</p>
+    </section>
+
+    <section class="sheet">
+      <h2>Vokabeln importieren</h2>
+      <p class="muted">Füge hier die Liste ein, die du von Claude bekommst (JSON). Bestehende Wörter mit gleicher ID werden aktualisiert, neue hinzugefügt.</p>
+      <div class="row">
+        <div class="field" style="max-width:160px"><label class="label" for="importUnit">Unit (falls nicht in der Liste)</label>
+          <input class="textIn" id="importUnit" inputmode="numeric" placeholder="z. B. 7"></div>
+      </div>
+      <textarea id="importText" placeholder='[{"en": "kitchen", "de": "Küche"}, …]'></textarea>
+      <div class="row">
+        <button class="btn ghost" id="previewBtn">Vorschau</button>
+        <button class="btn green" id="importBtn" disabled>Importieren</button>
+      </div>
+      <div id="importMsg" class="feedback" hidden></div>
+      <div class="tablewrap" id="previewWrap" hidden>
+        <table><thead><tr><th>Status</th><th>Unit</th><th>Englisch</th><th>Deutsch</th></tr></thead><tbody id="previewBody"></tbody></table>
+      </div>
+    </section>
+
+    <section class="sheet">
+      <div class="row" style="justify-content:space-between">
+        <h2>Alle Vokabeln <span class="muted" id="vocabCount"></span></h2>
+        <div class="row">
+          <label class="label" for="unitFilter">Unit</label>
+          <select id="unitFilter" class="chip"></select>
+        </div>
+      </div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th style="width:70px">Unit</th><th>Englisch</th><th>Deutsch</th><th style="width:90px"></th></tr></thead>
+          <tbody id="vocabBody"></tbody>
+        </table>
+      </div>
+      <form class="row" id="addForm" autocomplete="off">
+        <input class="textIn" id="addUnit" style="max-width:90px" placeholder="Unit" required aria-label="Unit">
+        <input class="textIn" id="addEn" style="flex:1;min-width:140px" placeholder="Englisch" required aria-label="Englisch">
+        <input class="textIn" id="addDe" style="flex:1;min-width:140px" placeholder="Deutsch" required aria-label="Deutsch">
+        <button class="btn" type="submit">Hinzufügen</button>
+      </form>
+      <p class="note">Änderungen werden gespeichert, sobald du ein Feld verlässt. Mehrere richtige Antworten trennst du mit „ / “, z. B. <code>grandad / grandfather</code>.</p>
+      <div id="vocabMsg" class="note" aria-live="polite"></div>
+    </section>
+  </div>
+</div>
+
+<script src="lib/supabase.js"></script>
+<script src="config.js"></script>
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const CFG = window.VOKABELHEFT_CONFIG || {};
+const sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, {
+  auth: { persistSession: true, autoRefreshToken: true, storageKey: "vh.auth" }
+});
+let me = null, vocab = [], pendingImport = [];
+const esc = s => { const d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; };
+const slug = s => String(s).toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,60) || "wort";
+const unitSort = (a,b) => (parseFloat(a)||99) - (parseFloat(b)||99) || String(a).localeCompare(String(b));
+
+function show(which){
+  $("view-login").hidden = which !== "login";
+  $("view-denied").hidden = which !== "denied";
+  $("adminArea").hidden = which !== "admin";
+  $("logoutBtn").hidden = which === "login";
+}
+
+/* ---------- auth ---------- */
+$("loginForm").onsubmit = async e => {
+  e.preventDefault();
+  const u = $("userIn").value.trim().toLowerCase();
+  $("loginBtn").disabled = true; $("loginError").hidden = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email: u.includes("@") ? u : u + "@" + CFG.emailDomain, password: $("pwIn").value });
+  $("loginBtn").disabled = false;
+  if (error) { $("loginError").textContent = "Anmeldung fehlgeschlagen. Benutzername oder Passwort prüfen."; $("loginError").hidden = false; return; }
+  $("pwIn").value = ""; boot(data.user.id);
+};
+$("logoutBtn").onclick = async () => { await sb.auth.signOut({ scope: "local" }); me = null; $("who").textContent = "Vokabelheft"; show("login"); };
+
+async function boot(uid){
+  const { data, error } = await sb.from("profiles").select("id,username,display_name,role").eq("id", uid).single();
+  if (error || !data) { show("denied"); return; }
+  me = data; $("who").textContent = "Angemeldet als " + me.display_name;
+  if (me.role !== "admin") { show("denied"); return; }
+  show("admin");
+  loadKids(); loadVocab();
+}
+
+/* ---------- kids ---------- */
+async function loadKids(){
+  const body = $("kidsBody");
+  const { data, error } = await sb.from("progress_overview").select("*").order("display_name");
+  if (error) { body.innerHTML = '<tr><td colspan="5">Konnte nicht geladen werden: ' + esc(error.message) + "</td></tr>"; return; }
+  if (!data.length) { body.innerHTML = '<tr><td colspan="5" class="muted">Noch keine Kinder angelegt.</td></tr>'; return; }
+  body.innerHTML = "";
+  for (const k of data) {
+    const tr = document.createElement("tr");
+    const last = k.last_practice ? new Date(k.last_practice).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" }) : "noch nie";
+    tr.innerHTML = '<td><input id="name-' + esc(k.user_id) + '" value="' + esc(k.display_name) + '" aria-label="Anzeigename"></td><td>' + esc(k.username) +
+      '</td><td class="num">' + k.words_mastered + ' / ' + vocab.length + '</td><td class="num">' + k.words_seen + "</td><td>" + esc(last) + "</td>";
+    const inp = tr.querySelector("input");
+    inp.onchange = async () => {
+      const v = inp.value.trim(); if (!v) { inp.value = k.display_name; return; }
+      const { error } = await sb.from("profiles").update({ display_name: v }).eq("id", k.user_id);
+      if (error) { inp.value = k.display_name; alertMsg("Name konnte nicht gespeichert werden."); } else { k.display_name = v; alertMsg("Name gespeichert."); }
+    };
+    body.append(tr);
+  }
+}
+$("reloadKids").onclick = loadKids;
+
+/* ---------- vocab table ---------- */
+async function loadVocab(){
+  const { data, error } = await sb.from("vocab").select("id,unit,en,de,sort").order("sort").order("id");
+  if (error) { $("vocabBody").innerHTML = '<tr><td colspan="4">Konnte nicht geladen werden: ' + esc(error.message) + "</td></tr>"; return; }
+  vocab = data; renderFilter(); renderVocab(); loadKids();
+}
+function renderFilter(){
+  const sel = $("unitFilter"), cur = sel.value;
+  const units = [...new Set(vocab.map(v => String(v.unit)))].sort(unitSort);
+  sel.innerHTML = '<option value="">Alle</option>' + units.map(u => '<option value="' + esc(u) + '">Unit ' + esc(u) + "</option>").join("");
+  sel.value = units.includes(cur) ? cur : "";
+}
+$("unitFilter").onchange = renderVocab;
+let pendingDelete = null;
+function renderVocab(){
+  const f = $("unitFilter").value;
+  const list = vocab.filter(v => !f || String(v.unit) === f);
+  $("vocabCount").textContent = "(" + vocab.length + ")";
+  const body = $("vocabBody"); body.innerHTML = "";
+  for (const w of list) {
+    const tr = document.createElement("tr");
+    for (const field of ["unit","en","de"]) {
+      const td = document.createElement("td"); const inp = document.createElement("input");
+      inp.value = w[field]; inp.id = field + "-" + w.id; inp.setAttribute("aria-label", field);
+      inp.onchange = async () => {
+        const v = inp.value.trim(); if (!v) { inp.value = w[field]; return; }
+        const { error } = await sb.from("vocab").update({ [field]: v }).eq("id", w.id);
+        if (error) { inp.value = w[field]; alertMsg("Konnte nicht speichern: " + error.message); }
+        else { w[field] = v; alertMsg("„" + w.en + "“ gespeichert."); if (field === "unit") renderFilter(); }
+      };
+      td.append(inp); tr.append(td);
+    }
+    const td = document.createElement("td"); const del = document.createElement("button");
+    del.className = "btn danger small"; del.id = "del-" + w.id;
+    del.textContent = pendingDelete === w.id ? "Wirklich?" : "Löschen";
+    del.onclick = async () => {
+      if (pendingDelete !== w.id) { pendingDelete = w.id; renderVocab(); return; }
+      pendingDelete = null;
+      const { error } = await sb.from("vocab").delete().eq("id", w.id);
+      if (error) alertMsg("Konnte nicht löschen: " + error.message);
+      else { vocab = vocab.filter(x => x.id !== w.id); alertMsg("„" + w.en + "“ gelöscht. Der Lernstand dazu ist ebenfalls weg."); renderFilter(); renderVocab(); }
+    };
+    td.append(del); tr.append(td); body.append(tr);
+  }
+}
+function alertMsg(t){ $("vocabMsg").textContent = t; }
+function newId(unit, en, taken){
+  let base = "u" + slug(unit) + "-" + slug(en), id = base, i = 2;
+  while (taken.has(id)) id = base + "-" + i++;
+  taken.add(id); return id;
+}
+$("addForm").onsubmit = async e => {
+  e.preventDefault();
+  const unit = $("addUnit").value.trim(), en = $("addEn").value.trim(), de = $("addDe").value.trim();
+  if (!unit || !en || !de) return;
+  const taken = new Set(vocab.map(v => v.id));
+  const row = { id: newId(unit, en, taken), unit, en, de, sort: nextSort() };
+  const { error } = await sb.from("vocab").insert(row);
+  if (error) { alertMsg("Konnte nicht hinzufügen: " + error.message); return; }
+  vocab.push(row); $("addEn").value = ""; $("addDe").value = ""; $("addEn").focus();
+  alertMsg("„" + en + "“ hinzugefügt."); renderFilter(); renderVocab();
+};
+function nextSort(){ return vocab.reduce((m, v) => Math.max(m, v.sort || 0), 0) + 1; }
+
+/* ---------- import ---------- */
+function parseImport(){
+  let raw = $("importText").value.trim();
+  raw = raw.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
+  const data = JSON.parse(raw);
+  let unit = $("importUnit").value.trim();
+  let words;
+  if (Array.isArray(data)) words = data;
+  else if (data && Array.isArray(data.words)) { words = data.words; if (!unit && data.unit != null) unit = String(data.unit); }
+  else throw new Error("Unbekanntes Format");
+  const byId = new Map(vocab.map(v => [v.id, v]));
+  const byKey = new Map(vocab.map(v => [String(v.unit) + "|" + v.en.toLowerCase(), v]));
+  const taken = new Set(vocab.map(v => v.id));
+  let sort = nextSort();
+  return words.filter(w => w && w.en && w.de).map(w => {
+    const u = String(w.unit != null ? w.unit : unit).trim();
+    if (!u) throw new Error("Für „" + w.en + "“ fehlt die Unit. Trag oben eine Unit ein.");
+    const en = String(w.en).trim(), de = String(w.de).trim();
+    const existing = (w.id && byId.get(w.id)) || byKey.get(u + "|" + en.toLowerCase());
+    if (existing) {
+      const same = existing.en === en && existing.de === de && String(existing.unit) === u;
+      return { status: same ? "gleich" : "ändern", row: { id: existing.id, unit: u, en, de, sort: existing.sort } };
+    }
+    return { status: "neu", row: { id: w.id && !taken.has(w.id) ? (taken.add(w.id), w.id) : newId(u, en, taken), unit: u, en, de, sort: sort++ } };
+  });
+}
+$("previewBtn").onclick = () => {
+  const msg = $("importMsg");
+  try {
+    pendingImport = parseImport();
+    const body = $("previewBody"); body.innerHTML = "";
+    for (const p of pendingImport) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = "<td>" + esc(p.status) + "</td><td>" + esc(p.row.unit) + "</td><td>" + esc(p.row.en) + "</td><td>" + esc(p.row.de) + "</td>";
+      body.append(tr);
+    }
+    const n = s => pendingImport.filter(p => p.status === s).length;
+    msg.className = "feedback info"; msg.hidden = false;
+    msg.textContent = n("neu") + " neu, " + n("ändern") + " geändert, " + n("gleich") + " unverändert.";
+    $("previewWrap").hidden = !pendingImport.length;
+    $("importBtn").disabled = !pendingImport.some(p => p.status !== "gleich");
+  } catch (e) {
+    pendingImport = []; $("importBtn").disabled = true; $("previewWrap").hidden = true;
+    msg.className = "feedback no"; msg.hidden = false;
+    msg.textContent = "Das konnte ich nicht lesen: " + (e.message || e) + ". Erwartet wird eine JSON-Liste mit en und de.";
+  }
+};
+$("importText").oninput = () => { $("importBtn").disabled = true; };
+$("importBtn").onclick = async () => {
+  const rows = pendingImport.filter(p => p.status !== "gleich").map(p => p.row);
+  if (!rows.length) return;
+  $("importBtn").disabled = true;
+  const { error } = await sb.from("vocab").upsert(rows, { onConflict: "id" });
+  const msg = $("importMsg"); msg.hidden = false;
+  if (error) { msg.className = "feedback no"; msg.textContent = "Import fehlgeschlagen: " + error.message; $("importBtn").disabled = false; return; }
+  msg.className = "feedback ok"; msg.textContent = rows.length + " Vokabeln gespeichert. Die Kinder sehen sie beim nächsten Öffnen der App.";
+  $("importText").value = ""; $("previewWrap").hidden = true; pendingImport = [];
+  loadVocab();
+};
+
+/* ---------- boot ---------- */
+(async () => {
+  if (!CFG.supabaseUrl || CFG.supabaseUrl.includes("DEIN-PROJEKT")) { show("denied"); $("view-denied").innerHTML = "<h2>Noch nicht eingerichtet</h2><p class='muted'>In config.js fehlen die Supabase-Daten.</p>"; return; }
+  const { data } = await sb.auth.getSession();
+  if (data && data.session) boot(data.session.user.id); else show("login");
+})();
+})();
+</script>
+</body>
+</html>
