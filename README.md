@@ -17,9 +17,6 @@ Die Kinder melden sich mit Benutzername und PIN an. Neue Vokabeln pflegt nur der
 
 ---
 
-zukraj-tewpen-4dAbbo
-
-
 ## 1. Supabase einrichten (ca. 15 Minuten)
 
 1. Auf https://supabase.com ein Konto anlegen und **New project** wählen.
