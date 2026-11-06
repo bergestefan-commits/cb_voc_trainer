@@ -59,18 +59,33 @@ und die Zugriffsregeln in der Datenbank legen fest, wer was darf.
 ## 4. Neue Vokabeln
 
 1. Schick Claude Fotos der neuen Heftseiten. Du bekommst eine JSON-Liste zurück.
-2. Öffne `…/vokabelheft/admin.html`, melde dich als `stefan` an und füge die Liste unter **Vokabeln importieren** ein.
+2. Öffne `…/vokabelheft/admin.html`, melde dich als `stefan` an, wähle unter **Vokabeln importieren** das Set und füge die Liste ein.
 3. Mit **Vorschau** prüfen, dann **Importieren**. Die Kinder bekommen die Wörter beim nächsten Öffnen der App.
 
 Einzelne Wörter kannst du in der Tabelle direkt korrigieren oder löschen.
 Mehrere richtige Antworten trennst du mit ` / `, z. B. `grandad / grandfather`.
 
+## 5. Vokabelsets (mehrere Sprachen oder Lernende)
+
+Es kann mehrere Vokabelsets geben, z. B. „Englisch“ für die Kinder und „Französisch“ für dich.
+
+- **Set anlegen:** In `admin.html` unter **Vokabelsets** Name, Sprache (z. B. `Französisch`) und Sprachcode (z. B. `fr-FR`) eintragen.
+  Der Sprachcode bestimmt die Vorlesestimme, die Sprache die Beschriftung in der App („Was heißt das auf Französisch?“).
+- **Wer sieht was:** Unter **Kinder** hakst du pro Kind die Sets an. Du als Admin siehst immer alle Sets.
+  Ein neu angelegtes Kind sieht erst etwas, wenn du ihm ein Set zuweist.
+- **Üben:** Wer mehr als ein Set sieht, wählt es in der App unter **Üben** oben aus.
+- Im Import-JSON heißt das Feld für die Fremdsprache immer `en`, auch bei Französisch usw.
+
+**Bestehende Datenbank aktualisieren:** `supabase/schema.sql` einmal erneut im SQL Editor ausführen,
+*bevor* die neuen App-Dateien hochgeladen werden. Alle vorhandenen Wörter landen im Set „Englisch“,
+und alle vorhandenen Kinder bekommen Zugriff darauf. Lernstand bleibt erhalten.
+
 ## Wer darf was
 
-| | Vokabeln | Profile | Lernstand |
+| | Vokabeln und Sets | Profile | Lernstand |
 |---|---|---|---|
-| Kind | lesen | nur eigenes lesen | nur eigenen lesen und schreiben |
-| Admin | lesen und schreiben | alle lesen, Namen ändern | alle lesen |
+| Kind | nur zugewiesene Sets lesen | nur eigenes lesen | nur eigenen lesen und schreiben |
+| Admin | alle lesen und schreiben, Sets zuweisen | alle lesen, Namen ändern | alle lesen |
 | Nicht angemeldet | nichts | nichts | nichts |
 
 Gespeichert werden pro Kind nur Benutzername, Anzeigename und Lernstand pro Wort (Stufe, richtig/falsch, zuletzt geübt).
@@ -79,7 +94,7 @@ Keine echten E-Mail-Adressen, keine Fotos, keine Geräte-Daten.
 ## Wenn Supabase pausiert
 
 Kostenlose Supabase-Projekte werden nach einer Woche ohne Nutzung pausiert. Die App läuft dann trotzdem weiter:
-Die Vokabeln sind auf dem iPad zwischengespeichert, und neue Ergebnisse warten, bis die Datenbank wieder erreichbar ist
+Die Vokabeln sind auf dem Gerät zwischengespeichert, und neue Ergebnisse warten, bis die Datenbank wieder erreichbar ist
 (oben rechts steht dann „… wartet auf Internet“). Zum Fortsetzen im Supabase-Dashboard auf **Restore project** klicken.
 
 ## Sicherung

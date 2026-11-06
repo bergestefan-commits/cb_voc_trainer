@@ -1,7 +1,7 @@
 // Offline-Cache für das Vokabelheft.
 // Nur Dateien der App selbst werden zwischengespeichert (erst Netz, sonst Cache).
 // Anfragen an Supabase laufen direkt und werden nicht angefasst.
-const CACHE = "vokabelheft-db-v1";
+const CACHE = "vokabelheft-db-v2";
 const APP = ["./", "index.html", "admin.html", "style.css", "config.js", "lib/supabase.js",
              "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
 

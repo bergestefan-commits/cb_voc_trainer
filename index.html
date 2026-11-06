@@ -17,7 +17,7 @@
   <header>
     <div>
       <h1 id="hello">Vokabelheft</h1>
-      <div class="sub muted" id="subline">Englisch üben, Wort für Wort</div>
+      <div class="sub muted" id="subline">Vokabeln üben, Wort für Wort</div>
     </div>
     <span class="sync" id="sync" hidden><i></i><span id="syncText"></span></span>
   </header>
@@ -53,6 +53,10 @@
       <span>Auf diesem Gerät gibt es noch Lernstand aus der alten Version. Welcher gehört dir?</span>
       <div class="row" id="migrateChoices" style="margin-top:10px"></div>
     </div>
+    <div id="deckPick" hidden>
+      <div class="label">Welches Vokabelset?</div>
+      <div class="chips" id="deckChips"></div>
+    </div>
     <div class="stats">
       <div><b id="st-total">0</b> Wörter</div>
       <div><b id="st-sure">0</b> sitzen schon</div>
@@ -62,8 +66,8 @@
     <div class="chips" id="unitChips"></div>
     <div class="label">Wie willst du üben?</div>
     <div class="modes">
-      <button class="mode" id="mode-write"><b>Schreiben</b><span>Du siehst Deutsch und tippst das englische Wort.</span></button>
-      <button class="mode" id="mode-cards"><b>Karteikarten</b><span>Du siehst Englisch, denkst nach und drehst um.</span></button>
+      <button class="mode" id="mode-write"><b>Schreiben</b><span id="mode-write-desc">Du siehst Deutsch und tippst das englische Wort.</span></button>
+      <button class="mode" id="mode-cards"><b>Karteikarten</b><span id="mode-cards-desc">Du siehst Englisch, denkst nach und drehst um.</span></button>
     </div>
     <div class="note">Jede Runde hat 10 Wörter. Wörter, die du oft falsch hast, kommen öfter dran.</div>
   </section>
@@ -110,7 +114,7 @@
 
   <section id="view-list" class="sheet" hidden>
     <div class="row" style="justify-content:space-between">
-      <h2>Alle Wörter</h2>
+      <h2 id="listTitle">Alle Wörter</h2>
       <span class="note">Punkte = wie gut das Wort sitzt</span>
     </div>
     <div id="listBody"></div>
@@ -148,7 +152,9 @@ const LS = {
 try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
 
 let user = null;         // {id, username, display_name, role}
-let vocab = [];          // [{id, unit, en, de, sort}]
+let vocab = [];          // [{id, deck, unit, en, de, sort}] – alle Sets, die der Nutzer sehen darf
+let decks = [];          // [{id, name, lang, lang_name, sort}]
+let deckId = null;       // aktuell gewähltes Set
 let progress = {};       // word_id -> {box, right_count, wrong_count, last_seen}
 let queue = {};          // word_id -> row waiting for upload
 let selectedUnits = null;
@@ -157,33 +163,52 @@ let selectedUnits = null;
 const CONTR = [["i'm","i am"],["you're","you are"],["we're","we are"],["they're","they are"],["it's","it is"],
   ["what's","what is"],["here's","here is"],["that's","that is"],["she's","she is"],["he's","he is"],
   ["don't","do not"],["isn't","is not"],["aren't","are not"],["can't","cannot"],["let's","let us"]];
-function norm(s){
+function norm(s, english){
   let t = String(s||"").toLowerCase().replace(/[’‘`´]/g,"'").replace(/[.!?;:"…]/g," ").replace(/\s*,\s*/g,", ").replace(/\s+/g," ").trim();
-  t = t.replace(/\bcolor/g,"colour").replace(/\bfavorite/g,"favourite").replace(/\bmom\b/g,"mum");
-  for (const [a,b] of CONTR) t = t.replace(new RegExp("\\b" + a + "(?=\\s|$|,)","g"), b);
+  if (english) {
+    t = t.replace(/\bcolor/g,"colour").replace(/\bfavorite/g,"favourite").replace(/\bmom\b/g,"mum");
+    for (const [a,b] of CONTR) t = t.replace(new RegExp("\\b" + a + "(?=\\s|$|,)","g"), b);
+  }
   return t.replace(/,$/,"").trim();
 }
 function lev(a,b){const m=a.length,n=b.length;if(Math.abs(m-n)>2)return 3;const d=Array.from({length:m+1},(_,i)=>[i]);
   for(let j=1;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[m][n];}
 function judge(input, en){
-  const a = norm(input); if (!a) return "no";
-  const alts = [en, ...en.split(/\s*\/\s*/)].map(norm);
+  const english = /^en\b/i.test(curDeck().lang);
+  const a = norm(input, english); if (!a) return "no";
+  const alts = [en, ...en.split(/\s*\/\s*/)].map(x => norm(x, english));
   if (alts.includes(a)) return "ok";
   const best = Math.min(...alts.map(x => lev(a,x)));
-  const len = norm(en).length;
+  const len = norm(en, english).length;
   if ((len >= 4 && best === 1) || (len >= 12 && best === 2)) return "near";
   return "no";
 }
 const canSpeak = (() => { try{ return "speechSynthesis" in window; }catch(e){ return false; } })();
-function speakEn(text){
-  try{ const u = new SpeechSynthesisUtterance(text.split(" / ")[0]); u.lang = "en-GB"; u.rate = .9;
-    const v = speechSynthesis.getVoices().find(v => /en-GB/i.test(v.lang)); if (v) u.voice = v;
+function speak(text){
+  const lang = curDeck().lang || "en-GB", short = lang.slice(0,2).toLowerCase();
+  try{ const u = new SpeechSynthesisUtterance(text.split(" / ")[0]); u.lang = lang; u.rate = .9;
+    const voices = speechSynthesis.getVoices(), same = l => l.replace("_","-").toLowerCase();
+    const v = voices.find(v => same(v.lang) === lang.toLowerCase()) || voices.find(v => same(v.lang).startsWith(short)); if (v) u.voice = v;
     speechSynthesis.cancel(); speechSynthesis.speak(u); }catch(e){}
 }
 function esc(s){ const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
-function unitsOf(){ const s = new Set(vocab.map(v => String(v.unit || "?")));
+function unitsOf(){ const s = new Set(words().map(v => String(v.unit || "?")));
   return [...s].sort((a,b) => (parseFloat(a)||99) - (parseFloat(b)||99) || a.localeCompare(b)); }
 function prog(w){ return progress[w.id] || null; }
+
+/* ---------- vocabulary sets ---------- */
+function curDeck(){ return decks.find(d => d.id === deckId) || { id: deckId, name: "", lang: "en-GB", lang_name: "Englisch" }; }
+function words(){ return vocab.filter(v => v.deck === deckId); }
+function selectDeck(id){
+  deckId = id;
+  const u = user && deckId ? LS.get("u." + user.id + ".units." + deckId, null) : null;
+  selectedUnits = u ? new Set(u) : null;
+  if (user) LS.set("u." + user.id + ".deck", deckId);
+}
+function ensureDeck(){
+  if (!decks.some(d => d.id === deckId)) selectDeck(decks.length ? decks[0].id : null);
+  else if (!selectedUnits) selectDeck(deckId);
+}
 
 /* ---------- views ---------- */
 const VIEWS = ["login","loading","practice","session","result","list","profile"];
@@ -227,7 +252,7 @@ $("logoutBtn").onclick = async () => {
   confirmLogoutPending = false;
   try { await sb.auth.signOut({ scope: "local" }); } catch(e) {}
   if (user) { LS.del("u." + user.id + ".queue"); }
-  user = null; vocab = []; progress = {}; queue = {}; selectedUnits = null;
+  user = null; vocab = []; decks = []; deckId = null; progress = {}; queue = {}; selectedUnits = null;
   $("hello").textContent = "Vokabelheft"; $("sync").hidden = true;
   show("login");
 };
@@ -235,18 +260,25 @@ let confirmLogoutPending = false;
 
 /* ---------- loading data ---------- */
 async function startFor(uid){
+  $("view-loading").innerHTML = '<p class="muted">Lade deine Vokabeln …</p>';
   show("loading");
   const k = "u." + uid + ".";
   user = LS.get(k + "profile", null) || { id: uid, display_name: "", username: "", role: "kid" };
-  vocab = LS.get("vocab", []);
+  LS.del("vocab");   // geräteweiter Cache aus der Zeit vor den Vokabelsets
+  vocab = LS.get(k + "vocab", []);
+  decks = LS.get(k + "decks", []);
+  deckId = LS.get(k + "deck", null); selectedUnits = null;
   progress = LS.get(k + "progress", {});
   queue = LS.get(k + "queue", {});
-  selectedUnits = (() => { const u = LS.get(k + "units", null); return u ? new Set(u) : null; })();
   if (vocab.length) afterLoad();
-  await refreshFromServer();
+  const online = await refreshFromServer();
   if (!vocab.length) {
-    $("view-loading").innerHTML = '<p class="muted">Die Vokabeln konnten nicht geladen werden. Beim ersten Mal braucht die App Internet.</p>';
-    return;
+    $("view-loading").innerHTML = online
+      ? '<p class="muted">Dir ist noch kein Vokabelset zugewiesen. Frag deine Eltern.</p>'
+      : '<p class="muted">Die Vokabeln konnten nicht geladen werden. Beim ersten Mal braucht die App Internet.</p>';
+    $("view-loading").insertAdjacentHTML("beforeend", '<button class="btn ghost" id="loadingLogout">Abmelden</button>');
+    $("loadingLogout").onclick = () => $("logoutBtn").onclick();
+    show("loading"); return;
   }
   afterLoad();
   flush();
@@ -254,24 +286,26 @@ async function startFor(uid){
 async function refreshFromServer(){
   if (!user) return false;
   try {
-    const [p, v, pr] = await Promise.all([
+    const [p, d, v, pr] = await Promise.all([
       sb.from("profiles").select("id,username,display_name,role").eq("id", user.id).single(),
-      sb.from("vocab").select("id,unit,en,de,sort").order("sort").order("id"),
+      sb.from("decks").select("id,name,lang,lang_name,sort").order("sort").order("name"),
+      sb.from("vocab").select("id,deck,unit,en,de,sort").order("sort").order("id"),
       sb.from("progress").select("word_id,box,right_count,wrong_count,last_seen").eq("user_id", user.id)
     ]);
-    if (p.error || v.error || pr.error) throw (p.error || v.error || pr.error);
-    user = p.data; vocab = v.data;
+    if (p.error || d.error || v.error || pr.error) throw (p.error || d.error || v.error || pr.error);
+    user = p.data; decks = d.data; vocab = v.data;
     const fresh = {};
     for (const r of pr.data) fresh[r.word_id] = { box: r.box, right_count: r.right_count, wrong_count: r.wrong_count, last_seen: r.last_seen };
     for (const [id, r] of Object.entries(queue)) fresh[id] = r;   // unsaved local results win
     progress = fresh;
     const k = "u." + user.id + ".";
-    LS.set(k + "profile", user); LS.set("vocab", vocab); LS.set(k + "progress", progress);
+    LS.set(k + "profile", user); LS.set(k + "decks", decks); LS.set(k + "vocab", vocab); LS.set(k + "progress", progress);
     return true;
   } catch (e) { return false; }
 }
 function afterLoad(){
   $("hello").textContent = user.display_name ? "Hallo " + user.display_name + "!" : "Vokabelheft";
+  ensureDeck();
   updateSync();
   checkMigration();
   if ($("view-practice").hidden && $("view-session").hidden && $("view-result").hidden && $("view-list").hidden && $("view-profile").hidden) show("practice");
@@ -354,29 +388,41 @@ function migrateFrom(localId){
 /* ---------- practice home ---------- */
 function renderHome(){
   if (!user) return;
-  $("st-total").textContent = vocab.length;
-  $("st-sure").textContent = vocab.filter(w => (prog(w)?.box || 0) >= 4).length;
-  $("st-new").textContent = vocab.filter(w => !prog(w)).length;
+  const deckBox = $("deckChips"); deckBox.innerHTML = "";
+  $("deckPick").hidden = decks.length < 2;
+  for (const d of decks){
+    const c = document.createElement("button"); c.className = "chip"; c.id = "deck-" + d.id;
+    c.textContent = d.name; c.setAttribute("aria-pressed", d.id === deckId);
+    c.onclick = () => { selectDeck(d.id); renderHome(); };
+    deckBox.append(c);
+  }
+  const L = curDeck().lang_name;
+  $("mode-write-desc").textContent = "Du siehst Deutsch und tippst das Wort auf " + L + ".";
+  $("mode-cards-desc").textContent = "Du siehst " + L + ", denkst nach und drehst um.";
+  const all = words();
+  $("st-total").textContent = all.length;
+  $("st-sure").textContent = all.filter(w => (prog(w)?.box || 0) >= 4).length;
+  $("st-new").textContent = all.filter(w => !prog(w)).length;
   const units = unitsOf();
   if (!selectedUnits) selectedUnits = new Set(units);
   const box = $("unitChips"); box.innerHTML = "";
   for (const u of units){
-    const n = vocab.filter(v => String(v.unit || "?") === u).length;
+    const n = all.filter(v => String(v.unit || "?") === u).length;
     const c = document.createElement("button"); c.className = "chip"; c.id = "unit-" + u;
     c.textContent = (u === "?" ? "Sonstige" : "Unit " + u) + " · " + n;
     c.setAttribute("aria-pressed", selectedUnits.has(u));
     c.onclick = () => { selectedUnits.has(u) ? selectedUnits.delete(u) : selectedUnits.add(u);
-      LS.set("u." + user.id + ".units", [...selectedUnits]); renderHome(); };
+      LS.set("u." + user.id + ".units." + deckId, [...selectedUnits]); renderHome(); };
     box.append(c);
   }
-  const pool = vocab.filter(v => selectedUnits.has(String(v.unit || "?")));
+  const pool = all.filter(v => selectedUnits.has(String(v.unit || "?")));
   $("mode-write").disabled = $("mode-cards").disabled = !pool.length;
 }
 
 /* ---------- session ---------- */
 let S = null;
 function pickRound(){
-  const pool = vocab.filter(v => selectedUnits.has(String(v.unit || "?")));
+  const pool = words().filter(v => selectedUnits.has(String(v.unit || "?")));
   const now = Date.now();
   return pool.map(v => {
     const p = prog(v); let w = Math.pow(2, 5 - (p ? p.box : 1)); if (!p) w *= 1.5;
@@ -399,7 +445,8 @@ function renderCard(){
   $("feedback").hidden = true; $("next").hidden = true; $("revealed").hidden = true; $("rateControls").hidden = true;
   $("speak").hidden = true;
   if (S.mode === "write"){
-    $("cardLabel").textContent = "Was heißt das auf Englisch?";
+    $("cardLabel").textContent = "Was heißt das auf " + curDeck().lang_name + "?";
+    $("answer").placeholder = "Auf " + curDeck().lang_name + " …";
     $("prompt").textContent = w.de;
     $("writeForm").hidden = false; $("cardControls").hidden = true;
     $("answer").value = ""; $("answer").disabled = false; $("check").disabled = false; $("skip").disabled = false;
@@ -411,7 +458,7 @@ function renderCard(){
     $("writeForm").hidden = true; $("cardControls").hidden = false;
   }
 }
-$("speak").onclick = () => speakEn(S.round[S.i].en);
+$("speak").onclick = () => speak(S.round[S.i].en);
 $("writeForm").onsubmit = e => { e.preventDefault(); if (!$("answer").value.trim()) return; grade(judge($("answer").value, S.round[S.i].en)); };
 $("skip").onclick = () => grade("no");
 function grade(res){
@@ -458,12 +505,13 @@ $("home").onclick = () => show("practice");
 /* ---------- list ---------- */
 function renderList(){
   const body = $("listBody"); body.innerHTML = "";
+  $("listTitle").textContent = decks.length > 1 ? "Alle Wörter · " + curDeck().name : "Alle Wörter";
   for (const u of unitsOf()){
-    const words = vocab.filter(v => String(v.unit || "?") === u);
+    const unitWords = words().filter(v => String(v.unit || "?") === u);
     const sec = document.createElement("div"); sec.className = "unit";
-    sec.innerHTML = "<h3><span>" + (u === "?" ? "Sonstige" : "Unit " + esc(u)) + '</span><span class="muted">' + words.length + "</span></h3>";
+    sec.innerHTML = "<h3><span>" + (u === "?" ? "Sonstige" : "Unit " + esc(u)) + '</span><span class="muted">' + unitWords.length + "</span></h3>";
     const ul = document.createElement("ul"); ul.className = "words";
-    for (const w of words){
+    for (const w of unitWords){
       const lvl = prog(w)?.box || 0;
       const li = document.createElement("li");
       li.innerHTML = '<span class="en">' + esc(w.en) + "</span><span>" + esc(w.de) + '</span><span class="dots" aria-label="Stufe ' + lvl + ' von 5">' +
@@ -487,8 +535,9 @@ $("refreshBtn").onclick = async () => {
   $("refreshBtn").disabled = true; $("refreshBtn").textContent = "Lade …";
   await flush();
   const ok = await refreshFromServer();
+  if (ok) ensureDeck();
   $("refreshBtn").disabled = false; $("refreshBtn").textContent = "Neue Vokabeln laden";
-  $("profileSync").textContent = ok ? "Aktuell: " + vocab.length + " Vokabeln." : "Gerade kein Internet. Probier es später nochmal.";
+  $("profileSync").textContent = ok ? "Aktuell: " + vocab.length + " Vokabeln in " + decks.length + (decks.length === 1 ? " Set." : " Sets.") : "Gerade kein Internet. Probier es später nochmal.";
   $("hello").textContent = user.display_name ? "Hallo " + user.display_name + "!" : "Vokabelheft";
 };
 
