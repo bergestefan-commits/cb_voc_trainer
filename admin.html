@@ -39,23 +39,43 @@
 
   <div id="adminArea" hidden style="display:flex;flex-direction:column;gap:18px">
     <section class="sheet">
+      <h2>Vokabelsets</h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Name</th><th>Sprache</th><th style="width:110px">Sprachcode</th><th class="num">Wörter</th><th style="width:90px"></th></tr></thead>
+          <tbody id="decksBody"></tbody>
+        </table>
+      </div>
+      <form class="row" id="addDeckForm" autocomplete="off">
+        <input class="textIn" id="deckName" style="flex:1;min-width:140px" placeholder="Name, z. B. Französisch Papa" required aria-label="Name des Sets">
+        <input class="textIn" id="deckLangName" style="flex:1;min-width:120px" placeholder="Sprache, z. B. Französisch" required aria-label="Sprache">
+        <input class="textIn" id="deckLang" style="max-width:110px" placeholder="fr-FR" required aria-label="Sprachcode">
+        <button class="btn" type="submit">Set anlegen</button>
+      </form>
+      <p class="note">Der Sprachcode bestimmt die Vorlesestimme, z. B. <code>en-GB</code>, <code>fr-FR</code>, <code>es-ES</code>, <code>it-IT</code>. Wer welches Set sieht, legst du unten bei den Kindern fest. Du als Admin siehst immer alle Sets.</p>
+      <div id="deckMsg" class="note" aria-live="polite"></div>
+    </section>
+
+    <section class="sheet">
       <div class="row" style="justify-content:space-between">
         <h2>Kinder</h2>
         <button class="btn ghost small" id="reloadKids">Aktualisieren</button>
       </div>
       <div class="tablewrap">
         <table>
-          <thead><tr><th>Anzeigename</th><th>Benutzername</th><th>Sitzen</th><th>Geübt</th><th>Zuletzt geübt</th></tr></thead>
+          <thead><tr><th>Anzeigename</th><th>Benutzername</th><th>Sitzen</th><th>Geübt</th><th>Zuletzt geübt</th><th>Sets</th></tr></thead>
           <tbody id="kidsBody"></tbody>
         </table>
       </div>
-      <p class="note">Neue Kinder legst du im Supabase-Dashboard an (Authentication → Users → Add user) mit der E-Mail <code>benutzername@vokabelheft.local</code> und der PIN als Passwort. Anzeigenamen kannst du hier direkt ändern.</p>
+      <p class="note">Neue Kinder legst du im Supabase-Dashboard an (Authentication → Users → Add user) mit der E-Mail <code>benutzername@vokabelheft.local</code> und der PIN als Passwort. Anzeigenamen kannst du hier direkt ändern. Ein neues Kind sieht erst Vokabeln, wenn du ihm hier ein Set zuweist.</p>
     </section>
 
     <section class="sheet">
       <h2>Vokabeln importieren</h2>
       <p class="muted">Füge hier die Liste ein, die du von Claude bekommst (JSON). Bestehende Wörter mit gleicher ID werden aktualisiert, neue hinzugefügt.</p>
       <div class="row">
+        <div class="field" style="max-width:240px"><label class="label" for="importDeck">Set</label>
+          <select class="textIn" id="importDeck"></select></div>
         <div class="field" style="max-width:160px"><label class="label" for="importUnit">Unit (falls nicht in der Liste)</label>
           <input class="textIn" id="importUnit" inputmode="numeric" placeholder="z. B. 7"></div>
       </div>
@@ -66,7 +86,7 @@
       </div>
       <div id="importMsg" class="feedback" hidden></div>
       <div class="tablewrap" id="previewWrap" hidden>
-        <table><thead><tr><th>Status</th><th>Unit</th><th>Englisch</th><th>Deutsch</th></tr></thead><tbody id="previewBody"></tbody></table>
+        <table><thead><tr><th>Status</th><th>Unit</th><th>Fremdsprache</th><th>Deutsch</th></tr></thead><tbody id="previewBody"></tbody></table>
       </div>
     </section>
 
@@ -74,13 +94,15 @@
       <div class="row" style="justify-content:space-between">
         <h2>Alle Vokabeln <span class="muted" id="vocabCount"></span></h2>
         <div class="row">
+          <label class="label" for="deckFilter">Set</label>
+          <select id="deckFilter" class="chip"></select>
           <label class="label" for="unitFilter">Unit</label>
           <select id="unitFilter" class="chip"></select>
         </div>
       </div>
       <div class="tablewrap">
         <table>
-          <thead><tr><th style="width:70px">Unit</th><th>Englisch</th><th>Deutsch</th><th style="width:90px"></th></tr></thead>
+          <thead><tr><th style="width:70px">Unit</th><th id="enHead">Englisch</th><th>Deutsch</th><th style="width:90px"></th></tr></thead>
           <tbody id="vocabBody"></tbody>
         </table>
       </div>
@@ -105,7 +127,7 @@ const CFG = window.VOKABELHEFT_CONFIG || {};
 const sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, {
   auth: { persistSession: true, autoRefreshToken: true, storageKey: "vh.auth" }
 });
-let me = null, vocab = [], pendingImport = [];
+let me = null, decks = [], access = [], vocab = [], pendingImport = [];
 const esc = s => { const d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; };
 const slug = s => String(s).toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,60) || "wort";
 const unitSort = (a,b) => (parseFloat(a)||99) - (parseFloat(b)||99) || String(a).localeCompare(String(b));
@@ -135,50 +157,141 @@ async function boot(uid){
   me = data; $("who").textContent = "Angemeldet als " + me.display_name;
   if (me.role !== "admin") { show("denied"); return; }
   show("admin");
-  loadKids(); loadVocab();
+  await loadDecks(); loadVocab();
 }
+
+/* ---------- vocabulary sets ---------- */
+const curDeck = () => decks.find(d => d.id === $("deckFilter").value) || null;
+async function loadDecks(){
+  const [d, a] = await Promise.all([
+    sb.from("decks").select("id,name,lang,lang_name,sort").order("sort").order("name"),
+    sb.from("deck_access").select("user_id,deck_id")
+  ]);
+  if (d.error || a.error) { $("decksBody").innerHTML = '<tr><td colspan="5">Konnte nicht geladen werden: ' + esc((d.error || a.error).message) + "</td></tr>"; return; }
+  decks = d.data; access = a.data;
+  renderDecks(); renderDeckSelects();
+}
+function renderDeckSelects(){
+  for (const id of ["deckFilter", "importDeck"]) {
+    const sel = $(id), cur = sel.value;
+    sel.innerHTML = decks.map(d => '<option value="' + esc(d.id) + '">' + esc(d.name) + "</option>").join("");
+    sel.value = decks.some(d => d.id === cur) ? cur : (decks[0] ? decks[0].id : "");
+  }
+}
+let pendingDeckDelete = null;
+function renderDecks(){
+  const body = $("decksBody"); body.innerHTML = "";
+  for (const d of decks) {
+    const tr = document.createElement("tr");
+    for (const field of ["name", "lang_name", "lang"]) {
+      const td = document.createElement("td"); const inp = document.createElement("input");
+      inp.value = d[field]; inp.id = "deck-" + field + "-" + d.id; inp.setAttribute("aria-label", field);
+      inp.onchange = async () => {
+        const v = inp.value.trim(); if (!v) { inp.value = d[field]; return; }
+        const { error } = await sb.from("decks").update({ [field]: v }).eq("id", d.id);
+        if (error) { inp.value = d[field]; deckMsg("Konnte nicht speichern: " + error.message); }
+        else { d[field] = v; deckMsg("Set „" + d.name + "“ gespeichert."); renderDeckSelects(); renderVocab(); loadKids(); }
+      };
+      td.append(inp); tr.append(td);
+    }
+    const n = vocab.filter(v => v.deck === d.id).length;
+    const count = document.createElement("td"); count.className = "num"; count.textContent = n; tr.append(count);
+    const td = document.createElement("td"); const del = document.createElement("button");
+    del.className = "btn danger small"; del.id = "deck-del-" + d.id;
+    del.textContent = pendingDeckDelete === d.id ? "Wirklich?" : "Löschen";
+    del.onclick = async () => {
+      if (n) { deckMsg("Im Set „" + d.name + "“ sind noch " + n + " Wörter. Lösch zuerst die Wörter."); return; }
+      if (pendingDeckDelete !== d.id) { pendingDeckDelete = d.id; renderDecks(); return; }
+      pendingDeckDelete = null;
+      const { error } = await sb.from("decks").delete().eq("id", d.id);
+      if (error) { deckMsg("Konnte nicht löschen: " + error.message); return; }
+      decks = decks.filter(x => x.id !== d.id); access = access.filter(a => a.deck_id !== d.id);
+      deckMsg("Set „" + d.name + "“ gelöscht."); renderDecks(); renderDeckSelects(); renderFilter(); renderVocab(); loadKids();
+    };
+    td.append(del); tr.append(td); body.append(tr);
+  }
+}
+function deckMsg(t){ $("deckMsg").textContent = t; }
+$("addDeckForm").onsubmit = async e => {
+  e.preventDefault();
+  const name = $("deckName").value.trim(), lang_name = $("deckLangName").value.trim(), lang = $("deckLang").value.trim();
+  if (!name || !lang_name || !lang) return;
+  const taken = new Set(decks.map(d => d.id));
+  let id = slug(name), i = 2;
+  while (taken.has(id)) id = slug(name) + "-" + i++;
+  const row = { id, name, lang, lang_name, sort: decks.reduce((m, d) => Math.max(m, d.sort || 0), 0) + 1 };
+  const { error } = await sb.from("decks").insert(row);
+  if (error) { deckMsg("Konnte nicht anlegen: " + error.message); return; }
+  decks.push(row); $("deckName").value = ""; $("deckLangName").value = ""; $("deckLang").value = "";
+  deckMsg("Set „" + name + "“ angelegt."); renderDecks(); renderDeckSelects(); loadKids();
+};
 
 /* ---------- kids ---------- */
 async function loadKids(){
   const body = $("kidsBody");
   const { data, error } = await sb.from("progress_overview").select("*").order("display_name");
-  if (error) { body.innerHTML = '<tr><td colspan="5">Konnte nicht geladen werden: ' + esc(error.message) + "</td></tr>"; return; }
-  if (!data.length) { body.innerHTML = '<tr><td colspan="5" class="muted">Noch keine Kinder angelegt.</td></tr>'; return; }
+  if (error) { body.innerHTML = '<tr><td colspan="6">Konnte nicht geladen werden: ' + esc(error.message) + "</td></tr>"; return; }
+  if (!data.length) { body.innerHTML = '<tr><td colspan="6" class="muted">Noch keine Kinder angelegt.</td></tr>'; return; }
   body.innerHTML = "";
   for (const k of data) {
     const tr = document.createElement("tr");
+    const hasDeck = id => access.some(a => a.user_id === k.user_id && a.deck_id === id);
+    const total = vocab.filter(v => hasDeck(v.deck)).length;
     const last = k.last_practice ? new Date(k.last_practice).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" }) : "noch nie";
     tr.innerHTML = '<td><input id="name-' + esc(k.user_id) + '" value="' + esc(k.display_name) + '" aria-label="Anzeigename"></td><td>' + esc(k.username) +
-      '</td><td class="num">' + k.words_mastered + ' / ' + vocab.length + '</td><td class="num">' + k.words_seen + "</td><td>" + esc(last) + "</td>";
+      '</td><td class="num">' + k.words_mastered + ' / ' + total + '</td><td class="num">' + k.words_seen + "</td><td>" + esc(last) + "</td>";
     const inp = tr.querySelector("input");
     inp.onchange = async () => {
       const v = inp.value.trim(); if (!v) { inp.value = k.display_name; return; }
       const { error } = await sb.from("profiles").update({ display_name: v }).eq("id", k.user_id);
       if (error) { inp.value = k.display_name; alertMsg("Name konnte nicht gespeichert werden."); } else { k.display_name = v; alertMsg("Name gespeichert."); }
     };
+    const sets = document.createElement("td");
+    for (const d of decks) {
+      const lab = document.createElement("label"); lab.className = "check";
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.id = "access-" + k.user_id + "-" + d.id;
+      cb.checked = hasDeck(d.id);
+      cb.onchange = async () => {
+        const { error } = cb.checked
+          ? await sb.from("deck_access").insert({ user_id: k.user_id, deck_id: d.id })
+          : await sb.from("deck_access").delete().eq("user_id", k.user_id).eq("deck_id", d.id);
+        if (error) { cb.checked = !cb.checked; alertMsg("Konnte nicht speichern: " + error.message); return; }
+        access = access.filter(a => !(a.user_id === k.user_id && a.deck_id === d.id));
+        if (cb.checked) access.push({ user_id: k.user_id, deck_id: d.id });
+        alertMsg(k.display_name + (cb.checked ? " sieht jetzt „" : " sieht nicht mehr „") + d.name + "“.");
+        loadKids();
+      };
+      lab.append(cb, " " + d.name); sets.append(lab);
+    }
+    tr.append(sets);
     body.append(tr);
   }
 }
-$("reloadKids").onclick = loadKids;
+$("reloadKids").onclick = async () => { await loadDecks(); loadKids(); };
 
 /* ---------- vocab table ---------- */
 async function loadVocab(){
-  const { data, error } = await sb.from("vocab").select("id,unit,en,de,sort").order("sort").order("id");
+  const { data, error } = await sb.from("vocab").select("id,deck,unit,en,de,sort").order("sort").order("id");
   if (error) { $("vocabBody").innerHTML = '<tr><td colspan="4">Konnte nicht geladen werden: ' + esc(error.message) + "</td></tr>"; return; }
-  vocab = data; renderFilter(); renderVocab(); loadKids();
+  vocab = data; renderFilter(); renderVocab(); renderDecks(); loadKids();
 }
 function renderFilter(){
   const sel = $("unitFilter"), cur = sel.value;
-  const units = [...new Set(vocab.map(v => String(v.unit)))].sort(unitSort);
+  const deck = $("deckFilter").value;
+  const units = [...new Set(vocab.filter(v => v.deck === deck).map(v => String(v.unit)))].sort(unitSort);
   sel.innerHTML = '<option value="">Alle</option>' + units.map(u => '<option value="' + esc(u) + '">Unit ' + esc(u) + "</option>").join("");
   sel.value = units.includes(cur) ? cur : "";
 }
 $("unitFilter").onchange = renderVocab;
+$("deckFilter").onchange = () => { renderFilter(); renderVocab(); };
 let pendingDelete = null;
 function renderVocab(){
-  const f = $("unitFilter").value;
-  const list = vocab.filter(v => !f || String(v.unit) === f);
-  $("vocabCount").textContent = "(" + vocab.length + ")";
+  const f = $("unitFilter").value, deck = $("deckFilter").value;
+  const inDeck = vocab.filter(v => v.deck === deck);
+  const list = inDeck.filter(v => !f || String(v.unit) === f);
+  const L = (curDeck() || {}).lang_name || "Fremdsprache";
+  $("enHead").textContent = L; $("addEn").placeholder = L; $("addEn").setAttribute("aria-label", L);
+  $("vocabCount").textContent = "(" + inDeck.length + ")";
   const body = $("vocabBody"); body.innerHTML = "";
   for (const w of list) {
     const tr = document.createElement("tr");
@@ -215,13 +328,15 @@ function newId(unit, en, taken){
 $("addForm").onsubmit = async e => {
   e.preventDefault();
   const unit = $("addUnit").value.trim(), en = $("addEn").value.trim(), de = $("addDe").value.trim();
+  const deck = $("deckFilter").value;
+  if (!deck) { alertMsg("Leg zuerst oben ein Vokabelset an."); return; }
   if (!unit || !en || !de) return;
   const taken = new Set(vocab.map(v => v.id));
-  const row = { id: newId(unit, en, taken), unit, en, de, sort: nextSort() };
+  const row = { id: newId(unit, en, taken), deck, unit, en, de, sort: nextSort() };
   const { error } = await sb.from("vocab").insert(row);
   if (error) { alertMsg("Konnte nicht hinzufügen: " + error.message); return; }
   vocab.push(row); $("addEn").value = ""; $("addDe").value = ""; $("addEn").focus();
-  alertMsg("„" + en + "“ hinzugefügt."); renderFilter(); renderVocab();
+  alertMsg("„" + en + "“ hinzugefügt."); renderFilter(); renderVocab(); renderDecks();
 };
 function nextSort(){ return vocab.reduce((m, v) => Math.max(m, v.sort || 0), 0) + 1; }
 
@@ -235,8 +350,11 @@ function parseImport(){
   if (Array.isArray(data)) words = data;
   else if (data && Array.isArray(data.words)) { words = data.words; if (!unit && data.unit != null) unit = String(data.unit); }
   else throw new Error("Unbekanntes Format");
-  const byId = new Map(vocab.map(v => [v.id, v]));
-  const byKey = new Map(vocab.map(v => [String(v.unit) + "|" + v.en.toLowerCase(), v]));
+  const deck = $("importDeck").value;
+  if (!deck) throw new Error("Es gibt noch kein Vokabelset");
+  const inDeck = vocab.filter(v => v.deck === deck);
+  const byId = new Map(inDeck.map(v => [v.id, v]));
+  const byKey = new Map(inDeck.map(v => [String(v.unit) + "|" + v.en.toLowerCase(), v]));
   const taken = new Set(vocab.map(v => v.id));
   let sort = nextSort();
   return words.filter(w => w && w.en && w.de).map(w => {
@@ -246,9 +364,9 @@ function parseImport(){
     const existing = (w.id && byId.get(w.id)) || byKey.get(u + "|" + en.toLowerCase());
     if (existing) {
       const same = existing.en === en && existing.de === de && String(existing.unit) === u;
-      return { status: same ? "gleich" : "ändern", row: { id: existing.id, unit: u, en, de, sort: existing.sort } };
+      return { status: same ? "gleich" : "ändern", row: { id: existing.id, deck, unit: u, en, de, sort: existing.sort } };
     }
-    return { status: "neu", row: { id: w.id && !taken.has(w.id) ? (taken.add(w.id), w.id) : newId(u, en, taken), unit: u, en, de, sort: sort++ } };
+    return { status: "neu", row: { id: w.id && !taken.has(w.id) ? (taken.add(w.id), w.id) : newId(u, en, taken), deck, unit: u, en, de, sort: sort++ } };
   });
 }
 $("previewBtn").onclick = () => {
@@ -269,10 +387,10 @@ $("previewBtn").onclick = () => {
   } catch (e) {
     pendingImport = []; $("importBtn").disabled = true; $("previewWrap").hidden = true;
     msg.className = "feedback no"; msg.hidden = false;
-    msg.textContent = "Das konnte ich nicht lesen: " + (e.message || e) + ". Erwartet wird eine JSON-Liste mit en und de.";
+    msg.textContent = "Das konnte ich nicht lesen: " + (e.message || e) + ". Erwartet wird eine JSON-Liste mit en (Fremdsprache) und de.";
   }
 };
-$("importText").oninput = () => { $("importBtn").disabled = true; };
+$("importText").oninput = $("importDeck").onchange = () => { $("importBtn").disabled = true; };
 $("importBtn").onclick = async () => {
   const rows = pendingImport.filter(p => p.status !== "gleich").map(p => p.row);
   if (!rows.length) return;

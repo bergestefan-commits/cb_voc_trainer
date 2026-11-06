@@ -87,6 +87,8 @@ table{border-collapse:collapse;width:100%;font-size:.95rem}
 th,td{text-align:left;padding:8px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
 th{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 td input{width:100%;min-width:90px;border:2px solid transparent;border-radius:8px;padding:5px 8px;background:transparent}
+td input[type=checkbox]{width:auto;min-width:0}
+.check{display:inline-flex;align-items:center;gap:4px;margin-right:12px;white-space:nowrap}
 td input:focus{border-color:var(--ink);background:var(--paper);outline:none}
 td.num{font-variant-numeric:tabular-nums}
 textarea{width:100%;min-height:140px;border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--paper);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem}
